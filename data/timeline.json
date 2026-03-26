@@ -1,0 +1,719 @@
+{
+  "timelineObjects": [
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455601234,
+          "longitudeE7": -1226089456,
+          "placeId": "home_01",
+          "name": "Home",
+          "address": "55th & Killingsworth, Portland, OR 97218"
+        },
+        "duration": { "startTimestamp": "2025-01-02T22:00:00Z", "endTimestamp": "2025-01-03T07:30:00Z" },
+        "visitConfidence": 95
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533187,
+          "longitudeE7": -1225768412,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-01-03T16:00:00Z", "endTimestamp": "2025-01-03T23:30:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455601891,
+          "longitudeE7": -1226089123,
+          "placeId": "home_01",
+          "name": "Home",
+          "address": "55th & Killingsworth, Portland, OR 97218"
+        },
+        "duration": { "startTimestamp": "2025-01-03T23:45:00Z", "endTimestamp": "2025-01-04T08:00:00Z" },
+        "visitConfidence": 95
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612445,
+          "longitudeE7": -1226301234,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-01-04T10:15:00Z", "endTimestamp": "2025-01-04T11:00:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455601567,
+          "longitudeE7": -1226089789,
+          "placeId": "home_01",
+          "name": "Home",
+          "address": "55th & Killingsworth, Portland, OR 97218"
+        },
+        "duration": { "startTimestamp": "2025-01-04T11:15:00Z", "endTimestamp": "2025-01-05T09:00:00Z" },
+        "visitConfidence": 95
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113201,
+          "longitudeE7": -1225958567,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-01-05T10:00:00Z", "endTimestamp": "2025-01-05T11:30:00Z" },
+        "visitConfidence": 88
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226789,
+          "longitudeE7": -1226523456,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-01-06T08:30:00Z", "endTimestamp": "2025-01-06T09:45:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533456,
+          "longitudeE7": -1225768789,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-01-06T16:00:00Z", "endTimestamp": "2025-01-06T23:30:00Z" },
+        "visitConfidence": 93
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455601345,
+          "longitudeE7": -1226089234,
+          "placeId": "home_01",
+          "name": "Home",
+          "address": "55th & Killingsworth, Portland, OR 97218"
+        },
+        "duration": { "startTimestamp": "2025-01-07T00:00:00Z", "endTimestamp": "2025-01-07T08:30:00Z" },
+        "visitConfidence": 95
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612123,
+          "longitudeE7": -1226301567,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-01-07T09:00:00Z", "endTimestamp": "2025-01-07T09:50:00Z" },
+        "visitConfidence": 89
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533789,
+          "longitudeE7": -1225768123,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-01-08T16:00:00Z", "endTimestamp": "2025-01-08T23:30:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455601789,
+          "longitudeE7": -1226089345,
+          "placeId": "home_01",
+          "name": "Home",
+          "address": "55th & Killingsworth, Portland, OR 97218"
+        },
+        "duration": { "startTimestamp": "2025-01-09T00:00:00Z", "endTimestamp": "2025-01-09T09:00:00Z" },
+        "visitConfidence": 95
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113456,
+          "longitudeE7": -1225958234,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-01-09T10:30:00Z", "endTimestamp": "2025-01-09T12:00:00Z" },
+        "visitConfidence": 87
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226345,
+          "longitudeE7": -1226523789,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-01-11T09:00:00Z", "endTimestamp": "2025-01-11T10:30:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533234,
+          "longitudeE7": -1225768567,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-01-13T16:00:00Z", "endTimestamp": "2025-01-13T23:30:00Z" },
+        "visitConfidence": 93
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612567,
+          "longitudeE7": -1226301890,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-01-14T10:00:00Z", "endTimestamp": "2025-01-14T10:45:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113678,
+          "longitudeE7": -1225958890,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-01-16T09:00:00Z", "endTimestamp": "2025-01-16T10:45:00Z" },
+        "visitConfidence": 86
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226567,
+          "longitudeE7": -1226523123,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-01-18T08:00:00Z", "endTimestamp": "2025-01-18T09:15:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533567,
+          "longitudeE7": -1225768234,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-01-20T16:00:00Z", "endTimestamp": "2025-01-20T23:30:00Z" },
+        "visitConfidence": 94
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612890,
+          "longitudeE7": -1226301123,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-01-21T11:00:00Z", "endTimestamp": "2025-01-21T11:50:00Z" },
+        "visitConfidence": 88
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113890,
+          "longitudeE7": -1225958123,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-01-23T10:00:00Z", "endTimestamp": "2025-01-23T11:30:00Z" },
+        "visitConfidence": 89
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226890,
+          "longitudeE7": -1226523567,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-01-25T08:30:00Z", "endTimestamp": "2025-01-25T10:00:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533890,
+          "longitudeE7": -1225768890,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-01-27T16:00:00Z", "endTimestamp": "2025-01-27T23:30:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612234,
+          "longitudeE7": -1226301456,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-01-28T09:30:00Z", "endTimestamp": "2025-01-28T10:20:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113123,
+          "longitudeE7": -1225958456,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-02-01T10:00:00Z", "endTimestamp": "2025-02-01T11:45:00Z" },
+        "visitConfidence": 87
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226123,
+          "longitudeE7": -1226523890,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-02-03T08:00:00Z", "endTimestamp": "2025-02-03T09:30:00Z" },
+        "visitConfidence": 93
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533123,
+          "longitudeE7": -1225768345,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-02-03T16:00:00Z", "endTimestamp": "2025-02-03T23:30:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612678,
+          "longitudeE7": -1226301789,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-02-04T10:30:00Z", "endTimestamp": "2025-02-04T11:15:00Z" },
+        "visitConfidence": 89
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113567,
+          "longitudeE7": -1225958789,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-02-06T09:30:00Z", "endTimestamp": "2025-02-06T11:00:00Z" },
+        "visitConfidence": 88
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226456,
+          "longitudeE7": -1226523234,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-02-08T08:30:00Z", "endTimestamp": "2025-02-08T10:00:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533345,
+          "longitudeE7": -1225768678,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-02-10T16:00:00Z", "endTimestamp": "2025-02-10T23:30:00Z" },
+        "visitConfidence": 94
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612345,
+          "longitudeE7": -1226301678,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-02-11T09:00:00Z", "endTimestamp": "2025-02-11T09:55:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113345,
+          "longitudeE7": -1225958678,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-02-13T10:00:00Z", "endTimestamp": "2025-02-13T11:30:00Z" },
+        "visitConfidence": 86
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226678,
+          "longitudeE7": -1226523345,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-02-15T08:00:00Z", "endTimestamp": "2025-02-15T09:30:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533678,
+          "longitudeE7": -1225768456,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-02-17T16:00:00Z", "endTimestamp": "2025-02-17T23:30:00Z" },
+        "visitConfidence": 93
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612456,
+          "longitudeE7": -1226301345,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-02-18T10:00:00Z", "endTimestamp": "2025-02-18T10:50:00Z" },
+        "visitConfidence": 87
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113789,
+          "longitudeE7": -1225958345,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-02-20T09:00:00Z", "endTimestamp": "2025-02-20T10:30:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226234,
+          "longitudeE7": -1226523678,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-02-22T08:30:00Z", "endTimestamp": "2025-02-22T10:00:00Z" },
+        "visitConfidence": 89
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533456,
+          "longitudeE7": -1225768123,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-02-24T16:00:00Z", "endTimestamp": "2025-02-24T23:30:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612789,
+          "longitudeE7": -1226301234,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-02-25T09:30:00Z", "endTimestamp": "2025-02-25T10:20:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113234,
+          "longitudeE7": -1225958567,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-02-27T10:00:00Z", "endTimestamp": "2025-02-27T11:45:00Z" },
+        "visitConfidence": 88
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226789,
+          "longitudeE7": -1226523456,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-03-01T08:00:00Z", "endTimestamp": "2025-03-01T09:30:00Z" },
+        "visitConfidence": 94
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533789,
+          "longitudeE7": -1225768567,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-03-03T16:00:00Z", "endTimestamp": "2025-03-03T23:30:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612123,
+          "longitudeE7": -1226301890,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-03-04T10:15:00Z", "endTimestamp": "2025-03-04T11:00:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113456,
+          "longitudeE7": -1225958234,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-03-06T09:30:00Z", "endTimestamp": "2025-03-06T11:00:00Z" },
+        "visitConfidence": 87
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226345,
+          "longitudeE7": -1226523789,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-03-08T08:30:00Z", "endTimestamp": "2025-03-08T10:00:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533234,
+          "longitudeE7": -1225768890,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-03-10T16:00:00Z", "endTimestamp": "2025-03-10T23:30:00Z" },
+        "visitConfidence": 93
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612567,
+          "longitudeE7": -1226301123,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-03-11T09:00:00Z", "endTimestamp": "2025-03-11T09:50:00Z" },
+        "visitConfidence": 88
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113678,
+          "longitudeE7": -1225958890,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-03-13T10:00:00Z", "endTimestamp": "2025-03-13T11:30:00Z" },
+        "visitConfidence": 89
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226567,
+          "longitudeE7": -1226523123,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-03-15T08:00:00Z", "endTimestamp": "2025-03-15T09:15:00Z" },
+        "visitConfidence": 91
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533567,
+          "longitudeE7": -1225768234,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-03-17T16:00:00Z", "endTimestamp": "2025-03-17T23:30:00Z" },
+        "visitConfidence": 94
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455612890,
+          "longitudeE7": -1226301567,
+          "placeId": "ChIJeSMCH92mlVQRtCIfvPiAp-Q",
+          "name": "New Seasons Market",
+          "address": "5320 NE 33rd Ave, Portland, OR 97211"
+        },
+        "duration": { "startTimestamp": "2025-03-18T10:30:00Z", "endTimestamp": "2025-03-18T11:15:00Z" },
+        "visitConfidence": 92
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455113890,
+          "longitudeE7": -1225958123,
+          "placeId": "ChIJNVdWgfiglVQRSuD8w0aQGrk",
+          "name": "Mt. Tabor Park",
+          "address": "SE 60th Ave & SE Salmon St, Portland, OR 97215"
+        },
+        "duration": { "startTimestamp": "2025-03-20T09:00:00Z", "endTimestamp": "2025-03-20T10:45:00Z" },
+        "visitConfidence": 86
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 455226890,
+          "longitudeE7": -1226523567,
+          "placeId": "ChIJabcUFAqhlVQRt_ZvcdJMSVo",
+          "name": "Shroom Coffee Bar",
+          "address": "1300 E Burnside St, Portland, OR 97214"
+        },
+        "duration": { "startTimestamp": "2025-03-22T08:30:00Z", "endTimestamp": "2025-03-22T10:00:00Z" },
+        "visitConfidence": 90
+      }
+    },
+    {
+      "placeVisit": {
+        "location": {
+          "latitudeE7": 454533890,
+          "longitudeE7": -1225768789,
+          "placeId": "ChIJV1yW89-flVQRlkzWZ00DTQE",
+          "name": "Best Buy",
+          "address": "9630 SE 82nd Ave, Portland, OR 97086"
+        },
+        "duration": { "startTimestamp": "2025-03-24T16:00:00Z", "endTimestamp": "2025-03-24T23:30:00Z" },
+        "visitConfidence": 92
+      }
+    }
+  ]
+}

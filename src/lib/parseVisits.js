@@ -1,19 +1,46 @@
 /**
+ * @typedef {{
+ *   location: { latitudeE7: number, longitudeE7: number, name?: string, placeId?: string },
+ *   duration: { startTimestamp: string, endTimestamp: string },
+ *   visitConfidence?: number
+ * }} TakeoutPlaceVisit
+ *
+ * @typedef {{ timelineObjects: Array<{ placeVisit?: TakeoutPlaceVisit }> }} TakeoutJson
+ *
+ * @typedef {{
+ *   lat: number, lng: number,
+ *   name: string|null, placeId: string|null,
+ *   start: Date, end: Date,
+ *   dwellMinutes: number, confidence: number
+ * }} Visit
+ *
+ * @typedef {{
+ *   placeId: string, name: string|null,
+ *   lat: number, lng: number,
+ *   visitCount: number, totalDwellMinutes: number,
+ *   familiarityScore: number
+ * }} Place
+ */
+
+/**
  * Parse Google Takeout Semantic Location History JSON
  * and convert to an array of visit objects with real coordinates
  * and dwell time in minutes
+ *
+ * @param {TakeoutJson} takeoutJson
+ * @returns {Visit[]}
  */
 export function parseVisits(takeoutJson) {
 	return takeoutJson.timelineObjects
 		.filter((obj) => obj.placeVisit)
 		.map((obj) => {
-			const visit = obj.placeVisit;
+			const visit = /** @type {TakeoutPlaceVisit} */ (obj.placeVisit);
 			const lat = visit.location.latitudeE7 / 1e7;
 			const lng = visit.location.longitudeE7 / 1e7;
 
 			const start = new Date(visit.duration.startTimestamp);
 			const end = new Date(visit.duration.endTimestamp);
-			const dwellMinutes = (end - start) / 1000 / 60;
+			const dwellMinutes = (end.getTime() - start.getTime()) / 1000 / 60;
 
 			return {
 				lat,
@@ -31,8 +58,12 @@ export function parseVisits(takeoutJson) {
 /**
  * Aggregate visits by placeId and compute a familiarity score
  * Score is based on visit count and total dwell time
+ *
+ * @param {Visit[]} visits
+ * @returns {Place[]}
  */
 export function computeFamiliarity(visits) {
+	/** @type {Record<string, Place>} */
 	const places = {};
 
 	visits.forEach((visit) => {
@@ -45,7 +76,8 @@ export function computeFamiliarity(visits) {
 				lat: visit.lat,
 				lng: visit.lng,
 				visitCount: 0,
-				totalDwellMinutes: 0
+				totalDwellMinutes: 0,
+				familiarityScore: 0
 			};
 		}
 

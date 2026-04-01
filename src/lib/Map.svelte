@@ -5,7 +5,9 @@
 
 	let { places = [] } = $props();
 
+	/** @type {HTMLDivElement} */
 	let mapContainer;
+	/** @type {mapboxgl.Map} */
 	let map;
 
 	onMount(() => {
@@ -54,7 +56,7 @@
 	});
 </script>
 
-<div bind:this={mapContainer} class="map" />
+<div bind:this={mapContainer} class="map"></div>
 
 <style>
 	.map {

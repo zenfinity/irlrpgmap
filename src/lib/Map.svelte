@@ -7,8 +7,54 @@
 
 	/** @type {HTMLDivElement} */
 	let mapContainer;
+	/** @type {HTMLCanvasElement} */
+	let fogCanvas;
 	/** @type {mapboxgl.Map} */
 	let map;
+
+	/** @param {mapboxgl.Map} map */
+	function drawFog(map) {
+		const ctx = fogCanvas.getContext('2d');
+		if (!ctx) return;
+
+		const { width, height } = fogCanvas;
+
+		ctx.clearRect(0, 0, width, height);
+
+		// paint the darkness
+		ctx.globalCompositeOperation = 'source-over';
+		ctx.fillStyle = 'rgba(45, 45, 48, 0.88)';
+		ctx.fillRect(0, 0, width, height);
+
+		// erase fog where places are known
+		ctx.globalCompositeOperation = 'destination-out';
+
+		for (const place of places) {
+			const { x, y } = map.project([place.lng, place.lat]);
+			const score = place.familiarityScore;
+
+			const innerRadius = 15 + score * 70;
+			const outerRadius = innerRadius + 35;
+
+			const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
+			gradient.addColorStop(0, `rgba(0, 0, 0, ${0.3 + score * 0.7})`);
+			gradient.addColorStop(innerRadius / outerRadius, `rgba(0, 0, 0, ${0.2 + score * 0.5})`);
+			gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+			ctx.fillStyle = gradient;
+			ctx.beginPath();
+			ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
+			ctx.fill();
+		}
+
+		// restore default for any future draws
+		ctx.globalCompositeOperation = 'source-over';
+	}
+
+	function syncCanvasSize() {
+		fogCanvas.width = mapContainer.offsetWidth;
+		fogCanvas.height = mapContainer.offsetHeight;
+	}
 
 	onMount(() => {
 		mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -21,34 +67,17 @@
 		});
 
 		map.on('load', () => {
-			map.addSource('places', {
-				type: 'geojson',
-				data: {
-					type: 'FeatureCollection',
-					features: places.map((place) => ({
-						type: 'Feature',
-						geometry: {
-							type: 'Point',
-							coordinates: [place.lng, place.lat]
-						},
-						properties: {
-							name: place.name,
-							score: place.familiarityScore
-						}
-					}))
-				}
-			});
+			map.getStyle().layers
+				.filter((layer) => layer['source-layer'] === 'road')
+				.forEach((layer) => map.setLayoutProperty(layer.id, 'visibility', 'none'));
 
-			map.addLayer({
-				id: 'familiarity-circles',
-				type: 'circle',
-				source: 'places',
-				paint: {
-					'circle-radius': ['interpolate', ['linear'], ['get', 'score'], 0, 8, 1, 40],
-					'circle-color': '#4a9eff',
-					'circle-opacity': ['interpolate', ['linear'], ['get', 'score'], 0, 0.2, 1, 0.7],
-					'circle-blur': 0.5
-				}
+			syncCanvasSize();
+			drawFog(map);
+
+			map.on('render', () => drawFog(map));
+			map.on('resize', () => {
+				syncCanvasSize();
+				drawFog(map);
 			});
 		});
 
@@ -56,11 +85,27 @@
 	});
 </script>
 
-<div bind:this={mapContainer} class="map"></div>
+<div class="map-wrapper">
+	<div bind:this={mapContainer} class="map"></div>
+	<canvas bind:this={fogCanvas} class="fog"></canvas>
+</div>
 
 <style>
-	.map {
+	.map-wrapper {
+		position: relative;
 		width: 100%;
 		height: 100vh;
+	}
+
+	.map {
+		width: 100%;
+		height: 100%;
+	}
+
+	.fog {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 1;
 	}
 </style>

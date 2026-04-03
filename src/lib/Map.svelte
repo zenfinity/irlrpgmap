@@ -12,18 +12,31 @@
 	/** @type {mapboxgl.Map} */
 	let map;
 
+	/**
+	 * Convert a real-world meter radius to screen pixels at a given zoom and latitude.
+	 * @param {number} meters
+	 * @param {number} zoom
+	 * @param {number} lat
+	 * @returns {number}
+	 */
+	function metersToPixels(meters, zoom, lat) {
+		const earthCircumference = 40075016.686;
+		return (meters * 256 * Math.pow(2, zoom)) / (earthCircumference * Math.cos((lat * Math.PI) / 180));
+	}
+
 	/** @param {mapboxgl.Map} map */
 	function drawFog(map) {
 		const ctx = fogCanvas.getContext('2d');
 		if (!ctx) return;
 
 		const { width, height } = fogCanvas;
+		const zoom = map.getZoom();
 
 		ctx.clearRect(0, 0, width, height);
 
 		// paint the darkness
 		ctx.globalCompositeOperation = 'source-over';
-		ctx.fillStyle = 'rgba(45, 45, 48, 0.88)';
+		ctx.fillStyle = 'rgba(140, 155, 175, 0.85)';
 		ctx.fillRect(0, 0, width, height);
 
 		// erase fog where places are known
@@ -33,12 +46,14 @@
 			const { x, y } = map.project([place.lng, place.lat]);
 			const score = place.familiarityScore;
 
-			const innerRadius = 15 + score * 70;
-			const outerRadius = innerRadius + 35;
+			const innerMeters = 100 + score * 600;
+			const outerMeters = innerMeters + 200;
+			const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
+			const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
 
 			const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
 			gradient.addColorStop(0, `rgba(0, 0, 0, ${0.3 + score * 0.7})`);
-			gradient.addColorStop(innerRadius / outerRadius, `rgba(0, 0, 0, ${0.2 + score * 0.5})`);
+			gradient.addColorStop(0.55, `rgba(0, 0, 0, ${0.15 + score * 0.4})`);
 			gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
 			ctx.fillStyle = gradient;
@@ -61,7 +76,7 @@
 
 		map = new mapboxgl.Map({
 			container: mapContainer,
-			style: 'mapbox://styles/mapbox/dark-v11',
+			style: 'mapbox://styles/mapbox/light-v11',
 			center: [-122.6089, 45.5601],
 			zoom: 11
 		});

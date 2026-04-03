@@ -1,10 +1,39 @@
 <script>
 	import Map from '$lib/Map.svelte';
-	import { parseVisits, computeFamiliarity } from '$lib/parseVisits.js';
-	import takeoutData from '$lib/data/synthetic_location_data.json';
+	import { invalidateAll } from '$app/navigation';
 
-	const visits = parseVisits(takeoutData);
-	const places = computeFamiliarity(visits);
+	let { data } = $props();
+
+	/** @type {HTMLInputElement} */
+	let fileInput;
+
+	let uploading = $state(false);
+
+	async function handleFile(e) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		uploading = true;
+
+		try {
+			const text = await file.text();
+			const res = await fetch('/api/import', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: text
+			});
+
+			if (res.ok) await invalidateAll();
+		} finally {
+			uploading = false;
+			fileInput.value = '';
+		}
+	}
+
+	async function clearMap() {
+		await fetch('/api/import', { method: 'DELETE' });
+		await invalidateAll();
+	}
 </script>
 
 <header>
@@ -16,9 +45,17 @@
 					<summary></summary>
 					<ul dir="rtl">
 						<li>
-							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener"
-								>GitHub</a
-							>
+							<a href="#" onclick={(e) => { e.preventDefault(); fileInput.click(); }}>
+								{uploading ? 'Importing…' : 'Import'}
+							</a>
+						</li>
+						{#if data.places.length > 0}
+							<li>
+								<a href="#" onclick={(e) => { e.preventDefault(); clearMap(); }}>Clear map</a>
+							</li>
+						{/if}
+						<li>
+							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener">GitHub</a>
 						</li>
 					</ul>
 				</details>
@@ -27,7 +64,9 @@
 	</nav>
 </header>
 
-<Map {places} />
+<input bind:this={fileInput} type="file" accept=".json" onchange={handleFile} />
+
+<Map places={data.places} />
 
 <style>
 	header {
@@ -50,5 +89,9 @@
 
 	summary:focus-visible {
 		outline: none;
+	}
+
+	input[type='file'] {
+		display: none;
 	}
 </style>

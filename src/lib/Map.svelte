@@ -71,6 +71,22 @@
 		fogCanvas.height = mapContainer.offsetHeight;
 	}
 
+	$effect(() => {
+		places;
+		if (!map) return;
+
+		drawFog(map);
+
+		if (places.length > 0) {
+			const lngs = places.map((p) => p.lng);
+			const lats = places.map((p) => p.lat);
+			map.fitBounds(
+				[[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+				{ padding: 80, duration: 800 }
+			);
+		}
+	});
+
 	onMount(() => {
 		mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 

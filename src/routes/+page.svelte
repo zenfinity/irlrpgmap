@@ -5,25 +5,27 @@
 
 	const visits = parseVisits(takeoutData);
 	const places = computeFamiliarity(visits);
-
-	let sidebarOpen = $state(false);
 </script>
 
 <header>
 	<span class="wordmark">irlrpgmap</span>
-	<button onclick={() => (sidebarOpen = true)} aria-label="Open menu">☰</button>
-</header>
-
-{#if sidebarOpen}
-	<div class="scrim" onclick={() => (sidebarOpen = false)}></div>
-{/if}
-
-<aside class:open={sidebarOpen}>
-	<button onclick={() => (sidebarOpen = false)} aria-label="Close menu">✕</button>
 	<nav>
-		<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener">GitHub</a>
+		<ul>
+			<li>
+				<details class="dropdown">
+					<summary></summary>
+					<ul dir="rtl">
+						<li>
+							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener"
+								>GitHub</a
+							>
+						</li>
+					</ul>
+				</details>
+			</li>
+		</ul>
 	</nav>
-</aside>
+</header>
 
 <Map {places} />
 
@@ -38,27 +40,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		overflow: visible;
 	}
 
-	.scrim {
-		position: fixed;
-		inset: 0;
-		z-index: 20;
-		background: rgba(0, 0, 0, 0.2);
+	details {
+		align-self: center;
+		margin: 0;
 	}
 
-	aside {
-		position: fixed;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 30;
-		width: 260px;
-		transform: translateX(100%);
-		transition: transform 0.25s ease;
-	}
-
-	aside.open {
-		transform: translateX(0);
+	summary:focus-visible {
+		outline: none;
 	}
 </style>

@@ -36,7 +36,7 @@
 
 		// paint the darkness
 		ctx.globalCompositeOperation = 'source-over';
-		ctx.fillStyle = 'rgba(140, 155, 175, 0.85)';
+		ctx.fillStyle = getComputedStyle(fogCanvas).getPropertyValue('--fog-color').trim();
 		ctx.fillRect(0, 0, width, height);
 
 		// erase fog where places are known
@@ -109,7 +109,8 @@
 	.map-wrapper {
 		position: relative;
 		width: 100%;
-		height: 100vh;
+		height: calc(100vh - var(--header-height));
+		margin-top: var(--header-height);
 	}
 
 	.map {

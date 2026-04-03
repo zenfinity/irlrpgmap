@@ -1,0 +1,6 @@
+@import '@picocss/pico/css/pico.indigo.min.css';
+
+:root {
+	--header-height: 3rem;
+	--fog-color: rgba(140, 155, 175, 0.85);
+}

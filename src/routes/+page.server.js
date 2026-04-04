@@ -1,9 +1,10 @@
 import { sql } from '$lib/server/db';
 import { computeFamiliarity } from '$lib/parseVisits.js';
 
-export async function load({ cookies }) {
-	const userId = cookies.get('userId');
-	if (!userId) return { places: [] };
+export async function load({ locals }) {
+	const userId = locals.user?.id;
+	if (!userId) return { places: [], user: null };
+	const user = locals.user;
 
 	const rows = await sql`
 		SELECT lat, lng, name, place_id, dwell_minutes, confidence
@@ -22,5 +23,5 @@ export async function load({ cookies }) {
 		end: new Date(0)
 	}));
 
-	return { places: computeFamiliarity(visits) };
+	return { places: computeFamiliarity(visits), user };
 }

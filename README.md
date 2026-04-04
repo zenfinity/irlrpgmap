@@ -1,42 +1,62 @@
-# sv
+# irlrpgmap
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A personal map that reveals the world as you explore it — like fog of war in an RPG, but for real life.
 
-## Creating a project
+Import your location history from Google Takeout and watch your map come alive with the places you've actually been. The more you've explored, the more your map reveals.
 
-If you're seeing this, you've probably already done this step. Congrats!
+![irlrpgmap screenshot](https://www.irlrpgmap.live/localhost_5173.jpeg)
+
+**[irlrpgmap.live](https://www.irlrpgmap.live)**
+
+---
+
+## How it works
+
+1. Sign up and sign in
+2. Go to [takeout.google.com](https://takeout.google.com), deselect all, select **Location History (Timeline)**, and export
+3. Unzip the download, find any JSON file inside `Semantic Location History`
+4. Import it — repeat for as many files as you like
+5. Your map populates with places you've visited, sized and shaded by familiarity
+
+---
+
+## Stack
+
+- **[SvelteKit](https://svelte.dev)** + Svelte 5 — frontend and server
+- **[Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/)** — map rendering and fog of war overlay
+- **[Neon](https://neon.tech)** — serverless Postgres
+- **[Better Auth](https://better-auth.com)** — authentication
+- **[PicoCSS](https://picocss.com)** — minimal styling
+- **[Vercel](https://vercel.com)** — hosting
+
+---
+
+## Roadmap
+
+- Live location tracking
+- Manual place entry
+- Granular familiarity levels (explored, searched, heard of)
+- Map sharing
+- Support for additional location history formats
+
+---
+
+## Local development
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.13.0 create --template minimal --types jsdoc --add prettier eslint devtools-json --install npm .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Requires a `.env` file with:
 
-To create a production version of your app:
-
-```sh
-npm run build
+```
+DATABASE_URL=...
+BETTER_AUTH_SECRET=...
+BETTER_AUTH_URL=http://localhost:5173
+VITE_MAPBOX_TOKEN=...
 ```
 
-You can preview the production build with `npm run preview`.
+---
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+*Built with [Claude Code](https://claude.ai/code) by Anthropic.*

@@ -31,7 +31,7 @@
 			const text = await file.text();
 			const res = await fetch('/api/import', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'application/json', 'x-filename': file.name },
 				body: text
 			});
 			if (res.ok) {
@@ -105,6 +105,18 @@
 				<button class="close" aria-label="Close" onclick={() => dialog.close()}></button>
 				<h3>{data.user.name}</h3>
 			</header>
+			{#if data.places.length === 0}
+				<div class="explainer">
+					<p>Import your location history from <strong>Google Takeout</strong> to populate your map.</p>
+					<ol>
+						<li>Go to <a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a></li>
+						<li>Deselect all, then select <strong>Location History (Timeline)</strong></li>
+						<li>Export and download the zip</li>
+						<li>Inside the zip, find <code>Semantic Location History</code> → open any year/month JSON file</li>
+						<li>Import it below — repeat for as many files as you like</li>
+					</ol>
+				</div>
+			{/if}
 			<div class="account-actions">
 				<button onclick={() => fileInput.click()} disabled={uploading}>
 					{uploading ? 'Importing…' : 'Import map data'}
@@ -113,6 +125,19 @@
 					<button class="secondary" onclick={clearMap}>Clear map</button>
 				{/if}
 			</div>
+			{#if data.importLog.length > 0}
+				<div class="import-log">
+					<p>Import history</p>
+					<ul>
+						{#each data.importLog as entry}
+							<li>
+								<span class="log-filename">{entry.filename}</span>
+								<span class="log-meta">{entry.imported_count} places · {new Date(entry.imported_at).toLocaleString()}</span>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 			<footer>
 				<button class="outline secondary" onclick={signOut}>Sign out</button>
 			</footer>
@@ -221,7 +246,62 @@
 	}
 
 	dialog article {
-		max-width: 22rem;
+		max-width: 26rem;
 		width: 90vw;
+	}
+
+	.explainer {
+		font-size: 0.875rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.explainer p {
+		margin-bottom: 0.5rem;
+	}
+
+	.explainer ol {
+		margin: 0;
+		padding-left: 1.25rem;
+	}
+
+	.explainer li {
+		margin-bottom: 0.25rem;
+	}
+
+	.import-log {
+		font-size: 0.8rem;
+		margin-bottom: 1rem;
+		border-top: 1px solid var(--pico-muted-border-color);
+		padding-top: 0.75rem;
+	}
+
+	.import-log p {
+		margin: 0 0 0.4rem;
+		font-weight: 600;
+		color: var(--pico-muted-color);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		font-size: 0.7rem;
+	}
+
+	.import-log ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.import-log li {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 0.4rem;
+	}
+
+	.log-filename {
+		font-weight: 500;
+		word-break: break-all;
+	}
+
+	.log-meta {
+		color: var(--pico-muted-color);
 	}
 </style>

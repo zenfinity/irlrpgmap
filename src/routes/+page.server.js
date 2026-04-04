@@ -3,7 +3,7 @@ import { computeFamiliarity } from '$lib/parseVisits.js';
 
 export async function load({ locals }) {
 	const userId = locals.user?.id;
-	if (!userId) return { places: [], user: null };
+	if (!userId) return { places: [], user: null, importLog: [] };
 	const user = locals.user;
 
 	const rows = await sql`
@@ -23,5 +23,12 @@ export async function load({ locals }) {
 		end: new Date(0)
 	}));
 
-	return { places: computeFamiliarity(visits), user };
+	const importLog = await sql`
+		SELECT filename, imported_count, imported_at
+		FROM import_log
+		WHERE user_id = ${userId}
+		ORDER BY imported_at DESC
+	`;
+
+	return { places: computeFamiliarity(visits), user, importLog };
 }

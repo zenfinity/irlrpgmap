@@ -6,8 +6,9 @@ export async function DELETE({ locals }) {
 	const userId = locals.user?.id;
 	if (!userId) error(401, 'Not signed in');
 
-	const result = await sql`DELETE FROM visits WHERE user_id = ${userId}`;
-	return json({ deleted: result.count });
+	await sql`DELETE FROM visits WHERE user_id = ${userId}`;
+	await sql`DELETE FROM import_log WHERE user_id = ${userId}`;
+	return json({ ok: true });
 }
 
 const BATCH_SIZE = 500;
@@ -15,6 +16,8 @@ const BATCH_SIZE = 500;
 export async function POST({ request, locals }) {
 	const userId = locals.user?.id;
 	if (!userId) error(401, 'Not signed in');
+
+	const filename = request.headers.get('x-filename') ?? 'unknown';
 
 	let takeoutJson;
 	try {
@@ -34,10 +37,11 @@ export async function POST({ request, locals }) {
 		return json({ imported: 0 });
 	}
 
+	let imported = 0;
 	for (let i = 0; i < visits.length; i += BATCH_SIZE) {
 		const batch = visits.slice(i, i + BATCH_SIZE);
 
-		await sql`
+		const rows = await sql`
 			INSERT INTO visits (user_id, lat, lng, name, place_id, start_time, end_time, dwell_minutes, confidence, source, knowledge_type)
 			SELECT ${userId}, lat, lng, name, place_id, start_time, end_time, dwell_minutes, confidence, 'google_takeout', 'explored'
 			FROM unnest(
@@ -50,8 +54,16 @@ export async function POST({ request, locals }) {
 				${batch.map((v) => v.dwellMinutes)}::float8[],
 				${batch.map((v) => v.confidence)}::float8[]
 			) AS t(lat, lng, name, place_id, start_time, end_time, dwell_minutes, confidence)
+			ON CONFLICT DO NOTHING
+			RETURNING id
 		`;
+		imported += rows.length;
 	}
 
-	return json({ imported: visits.length });
+	await sql`
+		INSERT INTO import_log (user_id, filename, imported_count)
+		VALUES (${userId}, ${filename}, ${imported})
+	`;
+
+	return json({ imported });
 }

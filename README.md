@@ -4,7 +4,7 @@ A personal map that reveals the world as you explore it — like fog of war in a
 
 Import your location history from Google Takeout and watch your map come alive with the places you've actually been. The more you've explored, the more your map reveals.
 
-![irlrpgmap screenshot](https://www.irlrpgmap.live/localhost_5173.jpeg)
+![irlrpgmap screenshot](https://www.irlrpgmap.live/screenshot.jpeg)
 
 **[irlrpgmap.live](https://www.irlrpgmap.live)**
 

@@ -13,9 +13,11 @@ Import your location history from Google Takeout and watch your map come alive w
 ## How it works
 
 1. Sign up and sign in
-2. Go to [takeout.google.com](https://takeout.google.com), deselect all, select **Location History (Timeline)**, and export
-3. Unzip the download, find any JSON file inside `Semantic Location History`
-4. Import it — repeat for as many files as you like
+2. Export your Timeline from the Google Maps mobile app (since 2024, Timeline is stored on-device, not in the cloud):
+   - **Android:** Phone Settings → Location → Timeline → Export Timeline Data
+   - **iPhone:** Google Maps → profile icon → Timeline → Export Timeline Data
+3. Transfer the exported JSON file to your computer
+4. Import it below — repeat for as many exports as you like
 5. Your map populates with places you've visited, sized and shaded by familiarity
 
 ---

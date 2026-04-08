@@ -107,14 +107,10 @@
 			</header>
 			{#if data.places.length === 0}
 				<div class="explainer">
-					<p>Import your location history from <strong>Google Takeout</strong> to populate your map.</p>
-					<ol>
-						<li>Go to <a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a></li>
-						<li>Deselect all, then select <strong>Location History (Timeline)</strong></li>
-						<li>Export and download the zip</li>
-						<li>Inside the zip, find <code>Semantic Location History</code> → open any year/month JSON file</li>
-						<li>Import it below — repeat for as many files as you like</li>
-					</ol>
+					<p>Import your location history from the <strong>Google Maps</strong> app to populate your map. Since 2024, Timeline is stored on-device, not in the cloud.</p>
+					<p><strong>Android:</strong> Phone Settings → Location → Timeline → Export Timeline Data</p>
+					<p><strong>iPhone:</strong> Google Maps → profile icon → Timeline → Export Timeline Data</p>
+					<p>Transfer the exported JSON to your computer, then import it below.</p>
 				</div>
 			{/if}
 			<div class="account-actions">

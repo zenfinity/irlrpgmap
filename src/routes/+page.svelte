@@ -25,6 +25,11 @@
 	$effect(() => {
 		const n = activeNeighborhood;
 		if (!n) { neighborhoodData = null; return; }
+		// Seed boundary immediately from already-loaded page data so the dungeon
+		// wall appears without waiting for the API round-trip
+		const cached = data.neighborhoods.find((nb) => nb.name === n);
+		neighborhoodData = { polygon: cached?.polygon ?? null, userPolygon: null, completionPct: cached?.completionPct ?? null };
+		// Then fetch userPolygon + fresh completionPct
 		fetch(`/api/neighborhoods/${encodeURIComponent(n)}`)
 			.then((r) => r.json())
 			.then((d) => { if (activeNeighborhood === n) neighborhoodData = d; });

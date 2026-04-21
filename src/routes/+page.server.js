@@ -23,7 +23,8 @@ export async function load({ locals }) {
 					)::numeric, 1)
 				ELSE NULL END AS completion_pct,
 				AVG(v.lat)::float8 AS centroid_lat,
-				AVG(v.lng)::float8 AS centroid_lng
+				AVG(v.lng)::float8 AS centroid_lng,
+				COUNT(*)::int AS visit_count
 			FROM visits v
 			LEFT JOIN neighborhoods n ON n.name = v.neighborhood
 			WHERE v.user_id = ${userId} AND v.neighborhood IS NOT NULL
@@ -56,7 +57,8 @@ export async function load({ locals }) {
 		polygon: /** @type {{type: string, coordinates: any}|null} */ (r.polygon ?? null),
 		completionPct: r.completion_pct != null ? Number(r.completion_pct) : null,
 		centroidLat: Number(r.centroid_lat),
-		centroidLng: Number(r.centroid_lng)
+		centroidLng: Number(r.centroid_lng),
+		visitCount: Number(r.visit_count)
 	}));
 
 	return { places, neighborhoods, user, importLog };

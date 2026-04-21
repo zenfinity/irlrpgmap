@@ -5,13 +5,14 @@
 
 	/**
 	 * @typedef {{type: string, coordinates: any}} GeoJsonGeom
-	 * @typedef {{name: string, polygon: GeoJsonGeom|null, completionPct: number|null, centroidLat: number, centroidLng: number}} NeighborhoodInfo
+	 * @typedef {{name: string, polygon: GeoJsonGeom|null, completionPct: number|null, centroidLat: number, centroidLng: number, visitCount: number}} NeighborhoodInfo
 	 */
 	/** @type {{ places?: import('./parseVisits.js').Place[], neighborhoods?: NeighborhoodInfo[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: GeoJsonGeom|null, userPolygon: GeoJsonGeom|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void }} */
 	let { places = [], neighborhoods = [], activeNeighborhood = null, neighborhoodData = null, onNeighborhoodSelect } = $props();
 
 	let mapContainer = $state();
 	let fogCanvas = $state();
+	let mapMoved = $state(false);
 	/** @type {mapboxgl.Map} */
 	let map;
 
@@ -53,11 +54,16 @@
 			// World view: reveal neighborhood shapes with alpha proportional to completion
 			for (const nb of neighborhoods) {
 				if (nb.polygon) {
-					// alpha: 0.15 at 0% explored → 0.90 at 100% explored
-					const alpha = 0.15 + ((nb.completionPct ?? 0) / 100) * 0.75;
-					fillGeoJsonPolygon(ctx, map, nb.polygon, alpha);
+					const isNew = nb.visitCount < 5;
+					// New areas: faint + heavily blurred (ghostly). Established: crisp soft edge.
+					const blurPx = isNew ? 20 : 8;
+					const alpha = isNew
+						? 0.10 + (nb.visitCount / 5) * 0.08
+						: 0.15 + ((nb.completionPct ?? 0) / 100) * 0.75;
+					fillGeoJsonPolygon(ctx, map, nb.polygon, alpha, blurPx);
 				} else {
 					// No polygon cached yet — soft circle at centroid
+					if (!isFinite(nb.centroidLng) || !isFinite(nb.centroidLat)) continue;
 					const { x, y } = map.project([nb.centroidLng, nb.centroidLat]);
 					const radius = metersToPixels(400, zoom, nb.centroidLat);
 					const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -73,6 +79,7 @@
 
 			// Places with no neighborhood still get a gentle circle reveal
 			for (const place of places.filter((p) => !p.neighborhood)) {
+				if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
 				const { x, y } = map.project([place.lng, place.lat]);
 				const radius = metersToPixels(300, zoom, place.lat);
 				const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -84,47 +91,84 @@
 				ctx.fill();
 			}
 		} else {
-			// Area view: circle-based reveals around individual visited places
-			for (const place of visiblePlaces) {
-				const { x, y } = map.project([place.lng, place.lat]);
-				const score = place.familiarityScore;
+			// Area view
+			const boundary = neighborhoodData?.polygon;
 
-				const innerMeters = 100 + score * 600;
-				const outerMeters = innerMeters + 200;
-				const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
-				const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
-
-				const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
-				gradient.addColorStop(0, `rgba(0, 0, 0, ${0.3 + score * 0.7})`);
-				gradient.addColorStop(0.55, `rgba(0, 0, 0, ${0.15 + score * 0.4})`);
-				gradient.addColorStop(innerRadius / outerRadius, 'rgba(0, 0, 0, 0)');
-				gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-				ctx.fillStyle = gradient;
-				ctx.beginPath();
-				ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
+			if (boundary) {
+				// Subtly lighten inside the boundary — shows the explorable area exists
+				ctx.globalAlpha = 0.18;
+				buildPolygonPath(ctx, map, boundary);
 				ctx.fill();
-			}
 
-			ctx.globalCompositeOperation = 'source-over';
+				// Clip circle reveals to boundary so fog can't bleed past the walls
+				ctx.save();
+				buildPolygonPath(ctx, map, boundary);
+				ctx.clip();
 
-			// User convex hull — solid outline showing explored shape
-			if (neighborhoodData?.userPolygon) {
-				drawGeoJsonPolygon(ctx, map, neighborhoodData.userPolygon, {
-					strokeStyle: 'hsl(220, 60%, 40%)',
-					lineWidth: 2,
-					globalAlpha: 0.9,
+				ctx.globalAlpha = 1;
+				for (const place of visiblePlaces) {
+					if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
+					const { x, y } = map.project([place.lng, place.lat]);
+					const score = place.familiarityScore;
+					const innerMeters = 100 + score * 600;
+					const outerMeters = innerMeters + 200;
+					const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
+					const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
+					const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
+					gradient.addColorStop(0, `rgba(0,0,0,${0.3 + score * 0.7})`);
+					gradient.addColorStop(0.55, `rgba(0,0,0,${0.15 + score * 0.4})`);
+					gradient.addColorStop(innerRadius / outerRadius, 'rgba(0,0,0,0)');
+					gradient.addColorStop(1, 'rgba(0,0,0,0)');
+					ctx.fillStyle = gradient;
+					ctx.beginPath();
+					ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
+					ctx.fill();
+				}
+
+				ctx.restore();
+				ctx.globalCompositeOperation = 'source-over';
+				ctx.globalAlpha = 1;
+
+				// Dungeon wall — boundary as solid stroke
+				drawGeoJsonPolygon(ctx, map, boundary, {
+					strokeStyle: 'hsl(220, 60%, 35%)',
+					lineWidth: 2.5,
+					globalAlpha: 0.85,
 					lineDash: []
 				});
-			}
-			// Real boundary — faint dashed outline
-			if (neighborhoodData?.polygon) {
-				drawGeoJsonPolygon(ctx, map, neighborhoodData.polygon, {
-					strokeStyle: 'hsl(220, 60%, 40%)',
-					lineWidth: 1.5,
-					globalAlpha: 0.35,
-					lineDash: [6, 4]
-				});
+
+				// User convex hull — explored shape within the dungeon
+				if (neighborhoodData?.userPolygon) {
+					drawGeoJsonPolygon(ctx, map, neighborhoodData.userPolygon, {
+						strokeStyle: 'hsl(220, 60%, 55%)',
+						lineWidth: 1.5,
+						globalAlpha: 0.5,
+						lineDash: [4, 3]
+					});
+				}
+			} else {
+				// Boundary not yet loaded — fall back to circles
+				ctx.globalAlpha = 1;
+				for (const place of visiblePlaces) {
+					if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
+					const { x, y } = map.project([place.lng, place.lat]);
+					const score = place.familiarityScore;
+					const innerMeters = 100 + score * 600;
+					const outerMeters = innerMeters + 200;
+					const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
+					const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
+					const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
+					gradient.addColorStop(0, `rgba(0,0,0,${0.3 + score * 0.7})`);
+					gradient.addColorStop(0.55, `rgba(0,0,0,${0.15 + score * 0.4})`);
+					gradient.addColorStop(innerRadius / outerRadius, 'rgba(0,0,0,0)');
+					gradient.addColorStop(1, 'rgba(0,0,0,0)');
+					ctx.fillStyle = gradient;
+					ctx.beginPath();
+					ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
+					ctx.fill();
+				}
+				ctx.globalCompositeOperation = 'source-over';
+				ctx.globalAlpha = 1;
 			}
 		}
 
@@ -133,29 +177,44 @@
 	}
 
 	/**
+	 * Build a canvas path for a GeoJSON Polygon or MultiPolygon without filling/stroking.
+	 * Used for clipping and as a building block for fills.
+	 * @param {CanvasRenderingContext2D} ctx
+	 * @param {mapboxgl.Map} map
+	 * @param {GeoJsonGeom} geojson
+	 */
+	function buildPolygonPath(ctx, map, geojson) {
+		const rings = geojson.type === 'MultiPolygon'
+			? geojson.coordinates.flat(1)
+			: geojson.coordinates;
+		ctx.beginPath();
+		for (const ring of rings) {
+			let started = false;
+			for (const coord of ring) {
+				if (!isFinite(coord[0]) || !isFinite(coord[1])) continue;
+				const { x, y } = map.project(coord);
+				if (!started) { ctx.moveTo(x, y); started = true; }
+				else ctx.lineTo(x, y);
+			}
+			if (started) ctx.closePath();
+		}
+	}
+
+	/**
 	 * Fill a GeoJSON Polygon or MultiPolygon on the canvas (for fog destination-out).
 	 * @param {CanvasRenderingContext2D} ctx
 	 * @param {mapboxgl.Map} map
 	 * @param {GeoJsonGeom} geojson
 	 * @param {number} alpha
+	 * @param {number} [blurPx]
 	 */
-	function fillGeoJsonPolygon(ctx, map, geojson, alpha) {
-		const rings = geojson.type === 'MultiPolygon'
-			? geojson.coordinates.flat(1)
-			: geojson.coordinates;
+	function fillGeoJsonPolygon(ctx, map, geojson, alpha, blurPx = 8) {
+		ctx.filter = `blur(${blurPx}px)`;
 		ctx.globalAlpha = alpha;
 		ctx.fillStyle = 'rgba(0,0,0,1)';
-		for (const ring of rings) {
-			if (!ring.length) continue;
-			ctx.beginPath();
-			for (let i = 0; i < ring.length; i++) {
-				const { x, y } = map.project(ring[i]);
-				if (i === 0) ctx.moveTo(x, y);
-				else ctx.lineTo(x, y);
-			}
-			ctx.closePath();
-			ctx.fill();
-		}
+		buildPolygonPath(ctx, map, geojson);
+		ctx.fill();
+		ctx.filter = 'none';
 		ctx.globalAlpha = 1;
 	}
 
@@ -223,6 +282,14 @@
 		});
 	}
 
+	function fitToVisible() {
+		const bbox = getBbox(visiblePlaces);
+		if (bbox) {
+			mapMoved = false;
+			map.fitBounds(bbox, { padding: 80, duration: 800, maxZoom: 14 });
+		}
+	}
+
 	$effect(() => {
 		places; neighborhoods; activeNeighborhood; neighborhoodData;
 		if (!map) return;
@@ -230,18 +297,11 @@
 		updatePinsSource();
 		drawFog(map);
 
-		if (map.getLayer('clusters')) {
-			// Cluster circles hidden in both views — fog reveals are the visualization
-			map.setPaintProperty('clusters', 'circle-opacity', 0);
-			map.setPaintProperty('clusters', 'circle-stroke-opacity', 0);
-			// Neighborhood labels only useful in World view
+		if (map.getLayer('cluster-labels')) {
 			map.setLayoutProperty('cluster-labels', 'visibility', activeNeighborhood ? 'none' : 'visible');
 		}
 
-		const bbox = getBbox(visiblePlaces);
-		if (bbox) {
-			map.fitBounds([bbox[0], bbox[1], bbox[2], bbox[3]], { padding: 80, duration: 800, maxZoom: 14 });
-		}
+		fitToVisible();
 	});
 
 	onMount(() => {
@@ -271,7 +331,7 @@
 				}
 			});
 
-			// Cluster circle
+			// Cluster circle — invisible, kept only as a click target
 			map.addLayer({
 				id: 'clusters',
 				type: 'circle',
@@ -280,7 +340,8 @@
 				paint: {
 					'circle-color': 'hsl(220, 60%, 40%)',
 					'circle-radius': 18,
-					'circle-opacity': 0.85
+					'circle-opacity': 0,
+					'circle-stroke-opacity': 0
 				}
 			});
 
@@ -332,16 +393,50 @@
 				if (neighborhood && onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
 			});
 
-			map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
-			map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
-			map.on('mouseenter', 'pins', () => { map.getCanvas().style.cursor = 'pointer'; });
-			map.on('mouseleave', 'pins', () => { map.getCanvas().style.cursor = ''; });
+			const popup = new mapboxgl.Popup({
+				closeButton: false,
+				closeOnClick: false,
+				offset: [0, -10]
+			});
+
+			map.on('mouseenter', 'clusters', (e) => {
+				map.getCanvas().style.cursor = 'pointer';
+				if (activeNeighborhood) return;
+				const feature = e.features?.[0];
+				const neighborhood = feature?.properties?.neighborhood;
+				if (!neighborhood) return;
+				const coords = /** @type {[number, number]} */ ((/** @type {any} */ (feature.geometry)).coordinates.slice());
+				popup.setLngLat(coords).setText(neighborhood).addTo(map);
+			});
+			map.on('mouseleave', 'clusters', () => {
+				map.getCanvas().style.cursor = '';
+				popup.remove();
+			});
+
+			map.on('mouseenter', 'pins', (e) => {
+				map.getCanvas().style.cursor = 'pointer';
+				const feature = e.features?.[0];
+				if (!feature) return;
+				const label = activeNeighborhood
+					? feature?.properties?.name
+					: feature?.properties?.neighborhood ?? null;
+				if (!label) return;
+				const coords = /** @type {[number, number]} */ ((/** @type {any} */ (feature.geometry)).coordinates.slice());
+				popup.setLngLat(coords).setText(label).addTo(map);
+			});
+
+			map.on('mouseleave', 'pins', () => {
+				map.getCanvas().style.cursor = '';
+				popup.remove();
+			});
 
 			syncCanvasSize();
 			updatePinsSource();
 			drawFog(map);
+			fitToVisible();
 
 
+			map.on('moveend', (e) => { if (e.originalEvent) mapMoved = true; });
 			map.on('render', () => drawFog(map));
 			map.on('resize', () => {
 				syncCanvasSize();
@@ -356,6 +451,13 @@
 <div class="map-wrapper">
 	<div bind:this={mapContainer} class="map"></div>
 	<canvas bind:this={fogCanvas} class="fog"></canvas>
+	{#if visiblePlaces.length > 0 && mapMoved}
+		<button class="recenter-btn" onclick={fitToVisible} title="Fit to pins" aria-label="Recenter map">
+			<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+				<path d="M1 1h4M1 1v4M13 1h-4M13 1v4M1 13h4M1 13v-4M13 13h-4M13 13v-4"/>
+			</svg>
+		</button>
+	{/if}
 </div>
 
 <style>
@@ -376,5 +478,43 @@
 		inset: 0;
 		pointer-events: none;
 		z-index: 1;
+	}
+
+	:global(.mapboxgl-popup) {
+		z-index: 2;
+	}
+
+	:global(.mapboxgl-popup-content) {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+		font-family: inherit;
+		border-radius: 0.25rem;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+		pointer-events: none;
+	}
+
+	:global(.mapboxgl-popup-tip) {
+		display: none;
+	}
+
+	.recenter-btn {
+		position: absolute;
+		top: 0.75rem;
+		right: 0.75rem;
+		z-index: 2;
+		width: 2rem;
+		height: 2rem;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--pico-background-color);
+		border: 1px solid var(--pico-muted-border-color);
+		border-radius: 0.3rem;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+		cursor: pointer;
+		color: var(--pico-color);
+		line-height: 1;
 	}
 </style>

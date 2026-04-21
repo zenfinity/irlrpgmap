@@ -8,8 +8,9 @@
 
 	let dialog = $state(/** @type {HTMLDialogElement} */ (/** @type {unknown} */ (undefined)));
 	let photoInput = $state(/** @type {HTMLInputElement} */ (/** @type {unknown} */ (undefined)));
+	let importInput = $state(/** @type {HTMLInputElement} */ (/** @type {unknown} */ (undefined)));
 
-	let activeTab = $state(/** @type {'gps'|'photo'|'search'} */ ('gps'));
+	let activeTab = $state(/** @type {'gps'|'photo'|'search'|'import'} */ ('gps'));
 	let submitting = $state(false);
 	let error = $state('');
 
@@ -33,6 +34,10 @@
 	let searchSelected = $state(null);
 	let searchDate = $state(new Date().toISOString().slice(0, 10));
 
+	// Import state
+	let importUploading = $state(false);
+	let importResult = $state(/** @type {number|null} */ (null));
+
 	export function open() {
 		activeTab = 'gps';
 		error = '';
@@ -44,6 +49,7 @@
 		searchSelected = null;
 		searchDate = new Date().toISOString().slice(0, 10);
 		if (searchAbort) { searchAbort.abort(); searchAbort = null; }
+		importResult = null;
 		dialog.showModal();
 	}
 
@@ -271,6 +277,34 @@
 		}
 	}
 
+	// --- Import ---
+
+	/** @param {Event & { currentTarget: HTMLInputElement }} e */
+	async function handleImport(e) {
+		const file = e.currentTarget.files?.[0];
+		if (!file) return;
+		importUploading = true;
+		importResult = null;
+		error = '';
+		try {
+			const text = await file.text();
+			const res = await fetch('/api/import', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'x-filename': file.name },
+				body: text
+			});
+			if (!res.ok) { error = 'Import failed. Is this a Google Maps Timeline JSON file?'; return; }
+			const data = await res.json();
+			importResult = data.imported;
+			onDone();
+		} catch {
+			error = 'Something went wrong. Try again.';
+		} finally {
+			importUploading = false;
+			importInput.value = '';
+		}
+	}
+
 	// --- Shared ---
 
 	/**
@@ -321,6 +355,7 @@
 			<button class="wuz-tab" class:active={activeTab === 'gps'} onclick={() => { activeTab = 'gps'; error = ''; }}>GPS</button>
 			<button class="wuz-tab" class:active={activeTab === 'photo'} onclick={() => { activeTab = 'photo'; error = ''; }}>Photo</button>
 			<button class="wuz-tab" class:active={activeTab === 'search'} onclick={() => { activeTab = 'search'; error = ''; }}>Search</button>
+			<button class="wuz-tab" class:active={activeTab === 'import'} onclick={() => { activeTab = 'import'; error = ''; importResult = null; }}>Import</button>
 		</nav>
 
 		{#if activeTab === 'gps'}
@@ -411,6 +446,22 @@
 					</div>
 				{/if}
 			</div>
+		{:else if activeTab === 'import'}
+			<div class="tab-content">
+				{#if importResult !== null}
+					<p class="hint">Imported {importResult.toLocaleString()} place{importResult !== 1 ? 's' : ''}.</p>
+					<button onclick={close}>Done</button>
+				{:else}
+					<div class="hint">
+						<p>Import your Google Maps Timeline export. In the Google Maps app:</p>
+						<p><strong>Android:</strong> Settings → Location → Timeline → Export Timeline Data</p>
+						<p><strong>iPhone:</strong> Profile → Timeline → Export Timeline Data</p>
+					</div>
+					<button onclick={() => importInput.click()} disabled={importUploading} aria-busy={importUploading}>
+						{importUploading ? 'Importing…' : 'Choose file'}
+					</button>
+				{/if}
+			</div>
 		{/if}
 
 		{#if error}
@@ -420,6 +471,7 @@
 </dialog>
 
 <input bind:this={photoInput} type="file" accept="image/*" multiple onchange={handlePhotos} />
+<input bind:this={importInput} type="file" accept=".json" onchange={handleImport} />
 
 <style>
 	dialog article {

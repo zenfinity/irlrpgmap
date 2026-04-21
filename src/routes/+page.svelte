@@ -6,7 +6,6 @@
 
 	let { data } = $props();
 
-	let fileInput = $state();
 	let dialog = $state();
 	let dropdown = $state();
 	let feedbackDialog = $state();
@@ -41,7 +40,6 @@
 	let password = $state('');
 	let authError = $state('');
 	let submitting = $state(false);
-	let uploading = $state(false);
 
 	let feedbackTitle = $state('');
 	let feedbackMessage = $state('');
@@ -80,28 +78,6 @@
 			feedbackDone = true;
 		} finally {
 			feedbackSubmitting = false;
-		}
-	}
-
-	/** @param {Event & { currentTarget: HTMLInputElement }} e */
-	async function handleFile(e) {
-		const file = e.currentTarget.files?.[0];
-		if (!file) return;
-		uploading = true;
-		try {
-			const text = await file.text();
-			const res = await fetch('/api/import', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json', 'x-filename': file.name },
-				body: text
-			});
-			if (res.ok) {
-				await invalidateAll();
-				dialog.close();
-			}
-		} finally {
-			uploading = false;
-			fileInput.value = '';
 		}
 	}
 
@@ -182,22 +158,11 @@
 				<button class="close" aria-label="Close" onclick={() => dialog.close()}></button>
 				<h3>{data.user.name}</h3>
 			</header>
-			{#if data.places.length === 0}
-				<div class="explainer">
-					<p>Import your location history from the <strong>Google Maps</strong> app to populate your map. Since 2024, Timeline is stored on-device, not in the cloud.</p>
-					<p><strong>Android:</strong> Phone Settings → Location → Timeline → Export Timeline Data</p>
-					<p><strong>iPhone:</strong> Google Maps → profile icon → Timeline → Export Timeline Data</p>
-					<p>Transfer the exported JSON to your computer, then import it below.</p>
+			{#if data.places.length > 0}
+				<div class="account-actions">
+					<button class="secondary" onclick={clearMap}>Clear map</button>
 				</div>
 			{/if}
-			<div class="account-actions">
-				<button onclick={() => fileInput.click()} disabled={uploading}>
-					{uploading ? 'Importing…' : 'Import map data'}
-				</button>
-				{#if data.places.length > 0}
-					<button class="secondary" onclick={clearMap}>Clear map</button>
-				{/if}
-			</div>
 			{#if data.importLog.length > 0}
 				<div class="import-log">
 					<p>Import history</p>
@@ -286,8 +251,6 @@
 		{/if}
 	</article>
 </dialog>
-
-<input bind:this={fileInput} type="file" accept=".json" onchange={handleFile} />
 
 <Map
 	places={data.places}

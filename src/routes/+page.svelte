@@ -10,6 +10,17 @@
 	let dropdown = $state();
 	let feedbackDialog = $state();
 
+	let activeNeighborhood = $state(/** @type {string|null} */ (null));
+	let neighborhoodData = $state(/** @type {{polygon: object|null, userPolygon: object|null, completionPct: number|null}|null} */ (null));
+
+	$effect(() => {
+		const n = activeNeighborhood;
+		if (!n) { neighborhoodData = null; return; }
+		fetch(`/api/neighborhoods/${encodeURIComponent(n)}`)
+			.then((r) => r.json())
+			.then((d) => { if (activeNeighborhood === n) neighborhoodData = d; });
+	});
+
 	let authMode = $state('existing'); // 'new' | 'existing'
 	let name = $state('');
 	let email = $state('');
@@ -113,6 +124,14 @@
 
 <header>
 	<span class="wordmark">irlrpgmap</span>
+	{#if activeNeighborhood}
+		<nav class="tabs">
+			<button class="tab" onclick={() => activeNeighborhood = null}>World</button>
+			<button class="tab active">
+				{activeNeighborhood}{neighborhoodData?.completionPct != null ? ` · ${neighborhoodData.completionPct}%` : ''}
+			</button>
+		</nav>
+	{/if}
 	<nav>
 		<ul>
 			<li>
@@ -251,7 +270,12 @@
 
 <input bind:this={fileInput} type="file" accept=".json" onchange={handleFile} />
 
-<Map places={data.places} />
+<Map
+	places={data.places}
+	{activeNeighborhood}
+	{neighborhoodData}
+	onNeighborhoodSelect={(name) => { activeNeighborhood = name; neighborhoodData = null; }}
+/>
 
 <style>
 	header {
@@ -367,5 +391,32 @@
 	.feedback-intro {
 		font-size: 0.875rem;
 		margin-bottom: 1.25rem;
+	}
+
+	.tabs {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		gap: 0.25rem;
+		align-items: center;
+	}
+
+	.tab {
+		--pico-form-element-spacing-vertical: 0.2rem;
+		--pico-form-element-spacing-horizontal: 0.65rem;
+		margin: 0;
+		font-size: 0.8rem;
+		background: none;
+		border: 1px solid transparent;
+		border-radius: 0.25rem;
+		color: var(--pico-muted-color);
+		white-space: nowrap;
+	}
+
+	.tab.active {
+		color: var(--pico-primary);
+		border-color: var(--pico-primary);
+		background: var(--pico-primary-background);
 	}
 </style>

@@ -10,6 +10,7 @@
  * @typedef {{
  *   lat: number, lng: number,
  *   name: string|null, placeId: string|null,
+ *   neighborhood: string|null,
  *   start: Date, end: Date,
  *   dwellMinutes: number, confidence: number
  * }} Visit
@@ -17,6 +18,7 @@
  * @typedef {{
  *   placeId: string, name: string|null,
  *   lat: number, lng: number,
+ *   neighborhood: string|null,
  *   visitCount: number, totalDwellMinutes: number,
  *   familiarityScore: number
  * }} Place
@@ -47,6 +49,7 @@ export function parseVisits(takeoutJson) {
 				lng,
 				name: visit.location.name || null,
 				placeId: visit.location.placeId || null,
+				neighborhood: null, // populated server-side after geocoding
 				start,
 				end,
 				dwellMinutes,
@@ -56,8 +59,9 @@ export function parseVisits(takeoutJson) {
 }
 
 /**
- * Aggregate visits by placeId and compute a familiarity score
- * Score is based on visit count and total dwell time
+ * Aggregate visits by placeId and compute a familiarity score.
+ * Score is based on visit count and total dwell time.
+ * Neighborhood is taken from the first visit for a given place.
  *
  * @param {Visit[]} visits
  * @returns {Place[]}
@@ -75,6 +79,7 @@ export function computeFamiliarity(visits) {
 				name: visit.name,
 				lat: visit.lat,
 				lng: visit.lng,
+				neighborhood: visit.neighborhood ?? null,
 				visitCount: 0,
 				totalDwellMinutes: 0,
 				familiarityScore: 0

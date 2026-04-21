@@ -27,8 +27,22 @@ export async function POST() {
 		)
 	`;
 
+	await sql`ALTER TABLE visits ADD COLUMN IF NOT EXISTS neighborhood TEXT`;
+
+	await sql`CREATE EXTENSION IF NOT EXISTS postgis`;
+
+	await sql`
+		CREATE TABLE IF NOT EXISTS neighborhoods (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			name TEXT NOT NULL UNIQUE,
+			polygon GEOMETRY,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+		)
+	`;
+
 	await sql`CREATE INDEX IF NOT EXISTS visits_user_id_idx ON visits (user_id)`;
 	await sql`CREATE INDEX IF NOT EXISTS visits_place_id_idx ON visits (place_id)`;
+	await sql`CREATE INDEX IF NOT EXISTS neighborhoods_name_idx ON neighborhoods (name)`;
 
 	return json({ ok: true });
 }

@@ -7,8 +7,8 @@
 	 * @typedef {{type: string, coordinates: any}} GeoJsonGeom
 	 * @typedef {{name: string, polygon: GeoJsonGeom|null, completionPct: number|null, centroidLat: number, centroidLng: number, visitCount: number}} NeighborhoodInfo
 	 */
-	/** @type {{ places?: import('./parseVisits.js').Place[], neighborhoods?: NeighborhoodInfo[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: GeoJsonGeom|null, userPolygon: GeoJsonGeom|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void }} */
-	let { places = [], neighborhoods = [], activeNeighborhood = null, neighborhoodData = null, onNeighborhoodSelect } = $props();
+	/** @type {{ places?: import('./parseVisits.js').Place[], neighborhoods?: NeighborhoodInfo[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: GeoJsonGeom|null, userPolygon: GeoJsonGeom|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void, onNeighborhoodHover?: (name: string|null) => void }} */
+	let { places = [], neighborhoods = [], activeNeighborhood = null, neighborhoodData = null, onNeighborhoodSelect, onNeighborhoodHover } = $props();
 
 	let mapContainer = $state();
 	let fogCanvas = $state();
@@ -55,17 +55,25 @@
 			for (const nb of neighborhoods) {
 				if (nb.polygon) {
 					const isNew = nb.visitCount < 5;
-					// New areas: faint + heavily blurred (ghostly). Established: crisp soft edge.
-					const blurPx = isNew ? 20 : 8;
+					// New areas: gentle blur. Established: crisp soft edge.
+					const blurPx = isNew ? 8 : 4;
 					const alpha = isNew
 						? 0.10 + (nb.visitCount / 5) * 0.08
 						: 0.15 + ((nb.completionPct ?? 0) / 100) * 0.75;
 					fillGeoJsonPolygon(ctx, map, nb.polygon, alpha, blurPx);
+					// Faint outline so small/new neighborhoods always have visible definition
+					drawGeoJsonPolygon(ctx, map, nb.polygon, {
+						strokeStyle: 'rgba(0,0,0,1)',
+						lineWidth: 0.75,
+						globalAlpha: isNew ? 0.12 : 0.20,
+						lineDash: []
+					});
 				} else {
 					// No polygon cached yet — soft circle at centroid
 					if (!isFinite(nb.centroidLng) || !isFinite(nb.centroidLat)) continue;
 					const { x, y } = map.project([nb.centroidLng, nb.centroidLat]);
 					const radius = metersToPixels(400, zoom, nb.centroidLat);
+					if (!isFinite(x) || !isFinite(y) || !isFinite(radius) || radius <= 0) continue;
 					const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
 					g.addColorStop(0, 'rgba(0,0,0,0.2)');
 					g.addColorStop(0.6, 'rgba(0,0,0,0.08)');
@@ -82,6 +90,7 @@
 				if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
 				const { x, y } = map.project([place.lng, place.lat]);
 				const radius = metersToPixels(300, zoom, place.lat);
+				if (!isFinite(x) || !isFinite(y) || !isFinite(radius) || radius <= 0) continue;
 				const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
 				g.addColorStop(0, 'rgba(0,0,0,0.25)');
 				g.addColorStop(1, 'rgba(0,0,0,0)');
@@ -114,6 +123,7 @@
 					const outerMeters = innerMeters + 200;
 					const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
 					const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
+					if (!isFinite(x) || !isFinite(y) || !isFinite(outerRadius) || outerRadius <= 0) continue;
 					const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
 					gradient.addColorStop(0, `rgba(0,0,0,${0.3 + score * 0.7})`);
 					gradient.addColorStop(0.55, `rgba(0,0,0,${0.15 + score * 0.4})`);
@@ -147,7 +157,7 @@
 					});
 				}
 			} else {
-				// Boundary not yet loaded — fall back to circles
+				// No boundary — fall back to circles
 				ctx.globalAlpha = 1;
 				for (const place of visiblePlaces) {
 					if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
@@ -157,6 +167,7 @@
 					const outerMeters = innerMeters + 200;
 					const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
 					const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
+					if (!isFinite(x) || !isFinite(y) || !isFinite(outerRadius) || outerRadius <= 0) continue;
 					const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
 					gradient.addColorStop(0, `rgba(0,0,0,${0.3 + score * 0.7})`);
 					gradient.addColorStop(0.55, `rgba(0,0,0,${0.15 + score * 0.4})`);
@@ -277,8 +288,22 @@
 			features: places.map((p) => ({
 				type: 'Feature',
 				geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-				properties: { name: p.name, neighborhood: p.neighborhood ?? '' }
+				properties: { name: p.name, neighborhood: p.neighborhood ?? '', visitCount: p.visitCount, totalDwellMinutes: p.totalDwellMinutes }
 			}))
+		});
+	}
+
+	function updateNeighborhoodSource() {
+		if (!map?.getSource('neighborhood-areas')) return;
+		/** @type {mapboxgl.GeoJSONSource} */ (map.getSource('neighborhood-areas')).setData({
+			type: 'FeatureCollection',
+			features: neighborhoods
+				.filter((nb) => isFinite(nb.centroidLng) && isFinite(nb.centroidLat))
+				.map((nb) => ({
+					type: /** @type {const} */ ('Feature'),
+					properties: { name: nb.name },
+					geometry: /** @type {any} */ (nb.polygon ?? { type: 'Point', coordinates: [nb.centroidLng, nb.centroidLat] })
+				}))
 		});
 	}
 
@@ -295,13 +320,22 @@
 		if (!map) return;
 
 		updatePinsSource();
+		updateNeighborhoodSource();
 		drawFog(map);
 
+		const inArea = !!activeNeighborhood;
 		if (map.getLayer('cluster-labels')) {
-			map.setLayoutProperty('cluster-labels', 'visibility', activeNeighborhood ? 'none' : 'visible');
+			map.setLayoutProperty('cluster-labels', 'visibility', inArea ? 'none' : 'visible');
 		}
 		if (map.getLayer('pins')) {
-			map.setLayoutProperty('pins', 'visibility', activeNeighborhood ? 'visible' : 'none');
+			map.setPaintProperty('pins', 'circle-opacity', inArea ? 0.9 : 0);
+			map.setPaintProperty('pins', 'circle-stroke-opacity', inArea ? 1 : 0);
+		}
+		if (map.getLayer('neighborhood-fills')) {
+			map.setLayoutProperty('neighborhood-fills', 'visibility', inArea ? 'none' : 'visible');
+		}
+		if (map.getLayer('neighborhood-centroids')) {
+			map.setLayoutProperty('neighborhood-centroids', 'visibility', inArea ? 'none' : 'visible');
 		}
 
 		fitToVisible();
@@ -368,34 +402,47 @@
 				}
 			});
 
-			// Individual pin — hidden in World view, shown in Area view
+			// Individual pin — invisible in World view, shown in Area view
 			map.addLayer({
 				id: 'pins',
 				type: 'circle',
 				source: 'places',
 				filter: ['!', ['has', 'point_count']],
-				layout: { visibility: 'none' },
 				paint: {
 					'circle-color': 'hsl(220, 60%, 40%)',
 					'circle-radius': 6,
 					'circle-stroke-width': 1.5,
 					'circle-stroke-color': '#fff',
-					'circle-opacity': 0.9
+					'circle-opacity': 0,
+					'circle-stroke-opacity': 0
 				}
 			});
 
-			// Click handlers
-			map.on('click', 'clusters', (e) => {
-				const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-				const neighborhood = features[0]?.properties?.neighborhood || '__ungrouped__';
-				if (onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
+			// --- Neighborhood hit areas (World view hover + click) ---
+			map.addSource('neighborhood-areas', {
+				type: 'geojson',
+				data: { type: 'FeatureCollection', features: [] }
 			});
 
-			map.on('click', 'pins', (e) => {
-				const features = map.queryRenderedFeatures(e.point, { layers: ['pins'] });
-				const neighborhood = features[0]?.properties?.neighborhood || '__ungrouped__';
-				if (onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
+			// Transparent fill for polygon neighborhoods
+			map.addLayer({
+				id: 'neighborhood-fills',
+				type: 'fill',
+				source: 'neighborhood-areas',
+				filter: ['==', '$type', 'Polygon'],
+				paint: { 'fill-opacity': 0 }
 			});
+
+			// Transparent circle for centroid-only neighborhoods
+			map.addLayer({
+				id: 'neighborhood-centroids',
+				type: 'circle',
+				source: 'neighborhood-areas',
+				filter: ['==', '$type', 'Point'],
+				paint: { 'circle-radius': 40, 'circle-opacity': 0, 'circle-stroke-opacity': 0 }
+			});
+
+			updateNeighborhoodSource();
 
 			const popup = new mapboxgl.Popup({
 				closeButton: false,
@@ -403,32 +450,49 @@
 				offset: [0, -10]
 			});
 
-			map.on('mouseenter', 'clusters', (e) => {
-				map.getCanvas().style.cursor = 'pointer';
+			// World view: click fog reveal to enter Area view; hover lifts name to header
+			for (const layer of ['neighborhood-fills', 'neighborhood-centroids']) {
+				map.on('click', layer, (e) => {
+					if (activeNeighborhood) return;
+					const name = e.features?.[0]?.properties?.name;
+					if (name && onNeighborhoodSelect) onNeighborhoodSelect(name);
+				});
+				map.on('mouseenter', layer, (e) => {
+					if (activeNeighborhood) return;
+					const name = e.features?.[0]?.properties?.name ?? null;
+					onNeighborhoodHover?.(name);
+				});
+				map.on('mouseleave', layer, () => {
+					if (activeNeighborhood) return;
+					onNeighborhoodHover?.(null);
+				});
+			}
+
+			// Ungrouped pins (no neighborhood) — still need a click target in World view
+			map.on('click', 'pins', (e) => {
 				if (activeNeighborhood) return;
-				const feature = e.features?.[0];
-				const neighborhood = feature?.properties?.neighborhood;
-				if (!neighborhood) return;
-				const coords = /** @type {[number, number]} */ ((/** @type {any} */ (feature.geometry)).coordinates.slice());
-				popup.setLngLat(coords).setText(neighborhood).addTo(map);
-			});
-			map.on('mouseleave', 'clusters', () => {
-				map.getCanvas().style.cursor = '';
-				popup.remove();
+				const features = map.queryRenderedFeatures(e.point, { layers: ['pins'] });
+				const neighborhood = features[0]?.properties?.neighborhood;
+				if (!neighborhood && onNeighborhoodSelect) onNeighborhoodSelect('__ungrouped__');
 			});
 
+			// Area view: hover pin to show place details
 			map.on('mouseenter', 'pins', (e) => {
+				if (!activeNeighborhood) return;
 				map.getCanvas().style.cursor = 'pointer';
 				const feature = e.features?.[0];
 				if (!feature) return;
-				const label = activeNeighborhood
-					? feature?.properties?.name
-					: (feature?.properties?.neighborhood ?? feature?.properties?.name ?? null);
-				if (!label) return;
+				const { name, visitCount, totalDwellMinutes } = feature.properties ?? {};
+				if (!name) return;
+				const visits = `${visitCount} ${visitCount === 1 ? 'visit' : 'visits'}`;
+				const mins = Math.round(totalDwellMinutes ?? 0);
+				const time = mins >= 60
+					? `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim()
+					: mins > 0 ? `${mins}m` : null;
+				const html = `<strong>${name}</strong><br>${visits}${time ? ` · ${time}` : ''}`;
 				const coords = /** @type {[number, number]} */ ((/** @type {any} */ (feature.geometry)).coordinates.slice());
-				popup.setLngLat(coords).setText(label).addTo(map);
+				popup.setLngLat(coords).setHTML(html).addTo(map);
 			});
-
 			map.on('mouseleave', 'pins', () => {
 				map.getCanvas().style.cursor = '';
 				popup.remove();
@@ -436,6 +500,7 @@
 
 			syncCanvasSize();
 			updatePinsSource();
+			updateNeighborhoodSource();
 			drawFog(map);
 			fitToVisible();
 

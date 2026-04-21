@@ -21,6 +21,7 @@
 	});
 
 	let activeNeighborhood = $state(/** @type {string|null} */ (null));
+	let hoveredNeighborhood = $state(/** @type {string|null} */ (null));
 	let neighborhoodData = $state(/** @type {{polygon: {type: string, coordinates: any}|null, userPolygon: {type: string, coordinates: any}|null, completionPct: number|null}|null} */ (null));
 
 	$effect(() => {
@@ -153,6 +154,8 @@
 				{activeNeighborhood === '__ungrouped__' ? 'Uncharted' : activeNeighborhood}{neighborhoodData?.completionPct != null ? ` · ${neighborhoodData.completionPct}%` : ''}
 			</button>
 		</nav>
+	{:else if hoveredNeighborhood}
+		<span class="neighborhood-hover-label">{hoveredNeighborhood}</span>
 	{/if}
 	<nav>
 		<ul>
@@ -307,6 +310,7 @@
 	{activeNeighborhood}
 	{neighborhoodData}
 	onNeighborhoodSelect={(name) => { activeNeighborhood = name; neighborhoodData = null; }}
+	onNeighborhoodHover={(name) => { hoveredNeighborhood = name; }}
 />
 
 {#if data.user}
@@ -465,6 +469,16 @@
 		display: flex;
 		gap: 0.25rem;
 		align-items: center;
+	}
+
+	.neighborhood-hover-label {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 0.8rem;
+		color: var(--pico-muted-color);
+		pointer-events: none;
+		white-space: nowrap;
 	}
 
 	.tab {

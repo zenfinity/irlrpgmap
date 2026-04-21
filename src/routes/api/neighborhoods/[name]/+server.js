@@ -32,8 +32,14 @@ export async function GET({ params, locals }) {
 				);
 				if (res.ok) {
 					const data = await res.json();
-					const geometry = data.features?.[0]?.geometry;
-					if (geometry) polygon = geometry;
+					const feature = data.features?.[0];
+					const featureName = feature?.properties?.name ?? '';
+					// Only accept the polygon if it actually matches this neighborhood —
+					// Nominatim falls back to city/county boundaries when no suburb polygon
+					// exists, which gives wildly wrong dungeon walls.
+					if (feature?.geometry && featureName.toLowerCase() === name.toLowerCase()) {
+						polygon = feature.geometry;
+					}
 				}
 			} catch {
 				// Nominatim unavailable — proceed without polygon

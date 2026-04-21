@@ -3,7 +3,7 @@
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
 
-	/** @type {{ places?: import('./parseVisits.js').Place[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: object|null, userPolygon: object|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void }} */
+	/** @type {{ places?: import('./parseVisits.js').Place[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: {type: string, coordinates: any}|null, userPolygon: {type: string, coordinates: any}|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void }} */
 	let { places = [], activeNeighborhood = null, neighborhoodData = null, onNeighborhoodSelect } = $props();
 
 	let mapContainer = $state();
@@ -129,7 +129,10 @@
 		fogCanvas.height = mapContainer.offsetHeight;
 	}
 
-	/** @returns {[number, number, number, number]|null} [minLng, minLat, maxLng, maxLat] */
+	/**
+	 * @param {Array<{lat: number, lng: number}>} ps
+	 * @returns {[number, number, number, number]|null} [minLng, minLat, maxLng, maxLat]
+	 */
 	function getBbox(ps) {
 		if (!ps.length) return null;
 		return [

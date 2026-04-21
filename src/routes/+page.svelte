@@ -1,5 +1,6 @@
 <script>
 	import Map from '$lib/Map.svelte';
+	import WuzHere from '$lib/WuzHere.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
 
@@ -9,9 +10,17 @@
 	let dialog = $state();
 	let dropdown = $state();
 	let feedbackDialog = $state();
+	let wuzHere = $state(/** @type {import('$lib/WuzHere.svelte').default} */ (/** @type {unknown} */ (undefined)));
+
+	const mapCenter = $derived.by(() => {
+		if (!data.places.length) return null;
+		const lat = data.places.reduce((s, p) => s + p.lat, 0) / data.places.length;
+		const lng = data.places.reduce((s, p) => s + p.lng, 0) / data.places.length;
+		return { lat, lng };
+	});
 
 	let activeNeighborhood = $state(/** @type {string|null} */ (null));
-	let neighborhoodData = $state(/** @type {{polygon: object|null, userPolygon: object|null, completionPct: number|null}|null} */ (null));
+	let neighborhoodData = $state(/** @type {{polygon: {type: string, coordinates: any}|null, userPolygon: {type: string, coordinates: any}|null, completionPct: number|null}|null} */ (null));
 
 	$effect(() => {
 		const n = activeNeighborhood;
@@ -277,6 +286,12 @@
 	onNeighborhoodSelect={(name) => { activeNeighborhood = name; neighborhoodData = null; }}
 />
 
+{#if data.user}
+	<button class="wuz-here-fab" onclick={() => wuzHere.open()}>Wuz Here</button>
+{/if}
+
+<WuzHere bind:this={wuzHere} onDone={invalidateAll} center={mapCenter} />
+
 <style>
 	header {
 		position: fixed;
@@ -418,5 +433,17 @@
 		color: var(--pico-primary);
 		border-color: var(--pico-primary);
 		background: var(--pico-primary-background);
+	}
+
+	.wuz-here-fab {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		z-index: 10;
+		margin: 0;
+		border-radius: 2rem;
+		padding: 0.6rem 1.25rem;
+		font-size: 0.9rem;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 	}
 </style>

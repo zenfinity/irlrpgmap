@@ -100,7 +100,7 @@
 			// Extract EXIF from all files in parallel
 			const raw = await Promise.all(files.map(async (file) => {
 				try {
-					const exif = await exifr.parse(file, { gps: true, pick: ['DateTimeOriginal', 'latitude', 'longitude'] });
+					const exif = await exifr.parse(file, { gps: true, exif: true });
 					if (!exif?.latitude || !exif?.longitude) return null;
 					return {
 						lat: exif.latitude,

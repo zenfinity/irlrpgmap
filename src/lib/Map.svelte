@@ -300,6 +300,9 @@
 		if (map.getLayer('cluster-labels')) {
 			map.setLayoutProperty('cluster-labels', 'visibility', activeNeighborhood ? 'none' : 'visible');
 		}
+		if (map.getLayer('pins')) {
+			map.setLayoutProperty('pins', 'visibility', activeNeighborhood ? 'visible' : 'none');
+		}
 
 		fitToVisible();
 	});
@@ -365,12 +368,13 @@
 				}
 			});
 
-			// Individual pin
+			// Individual pin — hidden in World view, shown in Area view
 			map.addLayer({
 				id: 'pins',
 				type: 'circle',
 				source: 'places',
 				filter: ['!', ['has', 'point_count']],
+				layout: { visibility: 'none' },
 				paint: {
 					'circle-color': 'hsl(220, 60%, 40%)',
 					'circle-radius': 6,

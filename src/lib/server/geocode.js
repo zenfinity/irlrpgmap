@@ -21,7 +21,7 @@ export async function geocodeNeighborhoods(locations) {
 	await Promise.all(
 		[...unique.entries()].map(async ([key, { lat, lng }]) => {
 			try {
-				const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=neighborhood&access_token=${VITE_MAPBOX_TOKEN}`;
+				const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=neighborhood,locality&access_token=${VITE_MAPBOX_TOKEN}`;
 				const res = await fetch(url);
 				if (!res.ok) { results.set(key, null); return; }
 				const data = await res.json();

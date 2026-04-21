@@ -286,6 +286,7 @@
 
 <Map
 	places={data.places}
+	neighborhoods={data.neighborhoods}
 	{activeNeighborhood}
 	{neighborhoodData}
 	onNeighborhoodSelect={(name) => { activeNeighborhood = name; neighborhoodData = null; }}

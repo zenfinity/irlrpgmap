@@ -2,7 +2,7 @@
 
 A personal map that reveals the world as you explore it — like fog of war in an RPG, but for real life.
 
-Import your location history from Google Takeout and watch your map come alive with the places you've actually been. The more you've explored, the more your map reveals.
+Log places you've been and watch your map come alive. The more you've explored a neighborhood, the more the fog lifts — down to its real boundary shape.
 
 ![irlrpgmap screenshot](https://www.irlrpgmap.live/screenshot.jpeg)
 
@@ -12,13 +12,14 @@ Import your location history from Google Takeout and watch your map come alive w
 
 ## How it works
 
-1. Sign up and sign in
-2. Export your Timeline from the Google Maps mobile app (since 2024, Timeline is stored on-device, not in the cloud):
-   - **Android:** Phone Settings → Location → Timeline → Export Timeline Data
-   - **iPhone:** Google Maps → profile icon → Timeline → Export Timeline Data
-3. Transfer the exported JSON file to your computer
-4. Import it below — repeat for as many exports as you like
-5. Your map populates with places you've visited, sized and shaded by familiarity
+Sign up, then use the **Wuz Here** button to add places you've been:
+
+- **GPS** — one tap to mark your current location
+- **Photo** — select photos from your camera roll; GPS and timestamps are read from EXIF metadata locally, clustered into places, and logged (nothing is uploaded)
+- **Search** — find any place by name and pick the date you visited
+- **Import** — bulk import your Google Maps Timeline export (JSON) for historical data
+
+In the **World view**, each neighborhood you've visited appears as a soft fog reveal — brighter the more you've explored it. Click a neighborhood to enter the **Area view**, where the real neighborhood boundary becomes a dungeon wall and your visited spots clear the fog inside it.
 
 ---
 
@@ -26,7 +27,7 @@ Import your location history from Google Takeout and watch your map come alive w
 
 - **[SvelteKit](https://svelte.dev)** + Svelte 5 — frontend and server
 - **[Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/)** — map rendering and fog of war overlay
-- **[Neon](https://neon.tech)** — serverless Postgres
+- **[Neon](https://neon.tech)** — serverless Postgres with PostGIS for neighborhood geometry
 - **[Better Auth](https://better-auth.com)** — authentication
 - **[PicoCSS](https://picocss.com)** — minimal styling
 - **[Vercel](https://vercel.com)** — hosting
@@ -35,8 +36,6 @@ Import your location history from Google Takeout and watch your map come alive w
 
 ## Roadmap
 
-- Live location tracking
-- Manual place entry
 - Granular familiarity levels (explored, searched, heard of)
 - Map sharing
 - Support for additional location history formats
@@ -57,6 +56,7 @@ DATABASE_URL=...
 BETTER_AUTH_SECRET=...
 BETTER_AUTH_URL=http://localhost:5173
 VITE_MAPBOX_TOKEN=...
+GH_TOKEN=...
 ```
 
 ---

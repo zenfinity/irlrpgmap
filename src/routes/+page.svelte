@@ -3,12 +3,14 @@
 	import WuzHere from '$lib/WuzHere.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
+	import { onMount } from 'svelte';
 
 	let { data } = $props();
 
 	let dialog = $state();
 	let dropdown = $state();
 	let feedbackDialog = $state();
+	let welcomeDialog = $state();
 	let wuzHere = $state(/** @type {import('$lib/WuzHere.svelte').default} */ (/** @type {unknown} */ (undefined)));
 
 	const mapCenter = $derived.by(() => {
@@ -110,6 +112,17 @@
 		await invalidateAll();
 		dialog.close();
 	}
+
+	function dismissWelcome() {
+		localStorage.setItem('irlrpg_welcomed', '1');
+		welcomeDialog.close();
+	}
+
+	onMount(() => {
+		if (!localStorage.getItem('irlrpg_welcomed')) {
+			welcomeDialog.showModal();
+		}
+	});
 </script>
 
 <header>
@@ -252,6 +265,20 @@
 				</button>
 			</form>
 		{/if}
+	</article>
+</dialog>
+
+<dialog bind:this={welcomeDialog} class="welcome-dialog">
+	<article>
+		<header>
+			<h3>Welcome to irlrpgmap 🗺️</h3>
+		</header>
+		<p>This is a map to help you bring discovery to everyday life. 🌍✨</p>
+		<p>Everything is hidden until you add locations you've been. The more you explore, the more the fog lifts — like an RPG unfolding in real life. 🧭⚔️</p>
+		<p>So <strong>Sign In</strong> and get out there! 🚀</p>
+		<footer>
+			<button onclick={dismissWelcome}>Let's Go! 🎉</button>
+		</footer>
 	</article>
 </dialog>
 
@@ -437,6 +464,26 @@
 		color: var(--pico-primary);
 		border-color: var(--pico-primary);
 		background: var(--pico-primary-background);
+	}
+
+	.welcome-dialog article {
+		max-width: 28rem;
+		width: 90vw;
+		text-align: center;
+	}
+
+	.welcome-dialog h3 {
+		font-size: 1.3rem;
+		margin-bottom: 0;
+	}
+
+	.welcome-dialog p {
+		font-size: 0.95rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.welcome-dialog footer {
+		justify-content: center;
 	}
 
 	.wuz-here-fab {

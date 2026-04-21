@@ -4,7 +4,7 @@ A personal map that reveals the world as you explore it — like fog of war in a
 
 Log places you've been and watch your map come alive. The more you've explored a neighborhood, the more the fog lifts — down to its real boundary shape.
 
-![irlrpgmap screenshot](https://www.irlrpgmap.live/screenshot.jpeg)
+![irlrpgmap screenshot](https://www.irlrpgmap.live/screenshot.jpeg?v=2)
 
 **[irlrpgmap.live](https://www.irlrpgmap.live)**
 

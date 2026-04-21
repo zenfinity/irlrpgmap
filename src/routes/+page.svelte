@@ -143,7 +143,7 @@
 	{/if}
 	<nav>
 		<ul>
-			<li>
+			<li class="account-btn-wrap">
 				<button class="account-btn" onclick={openModal}>
 					{data.user ? data.user.name : 'Sign in'}
 				</button>
@@ -152,6 +152,11 @@
 				<details class="dropdown" bind:this={dropdown}>
 					<summary></summary>
 					<ul dir="rtl">
+						<li class="mobile-menu-account">
+							<button onclick={() => { dropdown.open = false; openModal(); }}>
+								{data.user ? data.user.name : 'Sign in'}
+							</button>
+						</li>
 						<li>
 							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener" onclick={() => dropdown.open = false}>GitHub</a>
 						</li>
@@ -326,6 +331,19 @@
 		margin: 0;
 		padding: 0;
 		list-style: none;
+	}
+
+	.mobile-menu-account {
+		display: none;
+	}
+
+	@media (max-width: 480px) {
+		.account-btn-wrap {
+			display: none;
+		}
+		.mobile-menu-account {
+			display: block;
+		}
 	}
 
 	.account-btn {

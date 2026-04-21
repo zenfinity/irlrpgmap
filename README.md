@@ -39,6 +39,7 @@ In the **World view**, each neighborhood you've visited appears as a soft fog re
 - Granular familiarity levels (explored, searched, heard of)
 - Map sharing
 - Support for additional location history formats
+- Re-geocode existing visits with null neighborhood (locality fallback added post-import)
 
 ---
 

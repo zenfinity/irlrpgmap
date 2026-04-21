@@ -5,10 +5,10 @@
 
 	let { data } = $props();
 
-	/** @type {HTMLInputElement} */
-	let fileInput;
-	/** @type {HTMLDialogElement} */
-	let dialog;
+	let fileInput = $state();
+	let dialog = $state();
+	let dropdown = $state();
+	let feedbackDialog = $state();
 
 	let authMode = $state('existing'); // 'new' | 'existing'
 	let name = $state('');
@@ -18,13 +18,49 @@
 	let submitting = $state(false);
 	let uploading = $state(false);
 
+	let feedbackTitle = $state('');
+	let feedbackMessage = $state('');
+	let feedbackError = $state('');
+	let feedbackSubmitting = $state(false);
+	let feedbackDone = $state(false);
+
 	function openModal() {
 		authError = '';
 		dialog.showModal();
 	}
 
+	function openFeedback() {
+		feedbackTitle = '';
+		feedbackMessage = '';
+		feedbackError = '';
+		feedbackDone = false;
+		dropdown.open = false;
+		feedbackDialog.showModal();
+	}
+
+	async function submitFeedback() {
+		feedbackError = '';
+		feedbackSubmitting = true;
+		try {
+			const res = await fetch('/api/feedback', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ title: feedbackTitle, message: feedbackMessage })
+			});
+			if (!res.ok) {
+				const text = await res.text();
+				feedbackError = text || 'Something went wrong. Try again.';
+				return;
+			}
+			feedbackDone = true;
+		} finally {
+			feedbackSubmitting = false;
+		}
+	}
+
+	/** @param {Event & { currentTarget: HTMLInputElement }} e */
 	async function handleFile(e) {
-		const file = e.target.files?.[0];
+		const file = e.currentTarget.files?.[0];
 		if (!file) return;
 		uploading = true;
 		try {
@@ -56,10 +92,10 @@
 		try {
 			if (authMode === 'new') {
 				const { error } = await authClient.signUp.email({ name, email, password });
-				if (error) { authError = error.message; return; }
+				if (error) { authError = error.message ?? 'Unknown error'; return; }
 			} else {
 				const { error } = await authClient.signIn.email({ email, password });
-				if (error) { authError = error.message; return; }
+				if (error) { authError = error.message ?? 'Unknown error'; return; }
 			}
 			await invalidateAll();
 			dialog.close();
@@ -85,11 +121,14 @@
 				</button>
 			</li>
 			<li>
-				<details class="dropdown">
+				<details class="dropdown" bind:this={dropdown}>
 					<summary></summary>
 					<ul dir="rtl">
 						<li>
-							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener">GitHub</a>
+							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener" onclick={() => dropdown.open = false}>GitHub</a>
+						</li>
+						<li>
+							<button onclick={openFeedback}>Feedback</button>
 						</li>
 					</ul>
 				</details>
@@ -125,7 +164,7 @@
 				<div class="import-log">
 					<p>Import history</p>
 					<ul>
-						{#each data.importLog as entry}
+						{#each data.importLog as entry (entry.imported_at)}
 							<li>
 								<span class="log-filename">{entry.filename}</span>
 								<span class="log-meta">{entry.imported_count} places · {new Date(entry.imported_at).toLocaleString()}</span>
@@ -167,12 +206,45 @@
 			<footer>
 				{#if authMode === 'new'}
 					Already have an account?
-					<a href="#" onclick={(e) => { e.preventDefault(); authMode = 'existing'; authError = ''; }}>Sign in</a>
+					<button class="link" onclick={() => { authMode = 'existing'; authError = ''; }}>Sign in</button>
 				{:else}
 					New here?
-					<a href="#" onclick={(e) => { e.preventDefault(); authMode = 'new'; authError = ''; }}>Create account</a>
+					<button class="link" onclick={() => { authMode = 'new'; authError = ''; }}>Create account</button>
 				{/if}
 			</footer>
+		{/if}
+	</article>
+</dialog>
+
+<dialog bind:this={feedbackDialog}>
+	<article>
+		<header>
+			<button class="close" aria-label="Close" onclick={() => feedbackDialog.close()}></button>
+			<h3>Feedback</h3>
+		</header>
+		{#if feedbackDone}
+			<p>Thanks! Your feedback has been submitted.</p>
+			<footer>
+				<button onclick={() => feedbackDialog.close()}>Close</button>
+			</footer>
+		{:else}
+			<p class="feedback-intro">Found a bug or have an idea? We'd love to hear it. If you have a GitHub account you can also <a href="https://github.com/zenfinity/irlrpgmap/issues/new" target="_blank" rel="noopener">open an issue directly</a>.</p>
+			<form onsubmit={(e) => { e.preventDefault(); submitFeedback(); }}>
+				<label>
+					Title
+					<input type="text" bind:value={feedbackTitle} required placeholder="Brief summary" />
+				</label>
+				<label>
+					Message
+					<textarea bind:value={feedbackMessage} required placeholder="Describe the issue or idea…" rows="5"></textarea>
+				</label>
+				{#if feedbackError}
+					<p class="auth-error">{feedbackError}</p>
+				{/if}
+				<button type="submit" disabled={feedbackSubmitting} aria-busy={feedbackSubmitting}>
+					Submit
+				</button>
+			</form>
 		{/if}
 	</article>
 </dialog>
@@ -255,16 +327,7 @@
 		margin-bottom: 0.5rem;
 	}
 
-	.explainer ol {
-		margin: 0;
-		padding-left: 1.25rem;
-	}
-
-	.explainer li {
-		margin-bottom: 0.25rem;
-	}
-
-	.import-log {
+.import-log {
 		font-size: 0.8rem;
 		margin-bottom: 1rem;
 		border-top: 1px solid var(--pico-muted-border-color);
@@ -299,5 +362,10 @@
 
 	.log-meta {
 		color: var(--pico-muted-color);
+	}
+
+	.feedback-intro {
+		font-size: 0.875rem;
+		margin-bottom: 1.25rem;
 	}
 </style>

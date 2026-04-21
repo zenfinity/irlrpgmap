@@ -4,3 +4,16 @@
 	--header-height: 3rem;
 	--fog-color: rgba(140, 155, 175, 0.85);
 }
+
+button.link {
+	display: inline;
+	width: auto;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: none;
+	color: var(--pico-primary);
+	font-size: inherit;
+	cursor: pointer;
+	text-decoration: underline;
+}

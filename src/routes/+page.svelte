@@ -102,6 +102,9 @@
 			}
 			await invalidateAll();
 			dialog.close();
+			if (!localStorage.getItem('irlrpg_wuz_here_used')) {
+				wuzHerePulse = true;
+			}
 		} finally {
 			submitting = false;
 		}
@@ -113,14 +116,25 @@
 		dialog.close();
 	}
 
+	let wuzHerePulse = $state(false);
+
 	function dismissWelcome() {
 		localStorage.setItem('irlrpg_welcomed', '1');
 		welcomeDialog.close();
 	}
 
+	function handleWuzHereClick() {
+		wuzHerePulse = false;
+		localStorage.setItem('irlrpg_wuz_here_used', '1');
+		wuzHere.open();
+	}
+
 	onMount(() => {
 		if (!localStorage.getItem('irlrpg_welcomed')) {
 			welcomeDialog.showModal();
+		}
+		if (data.user && !localStorage.getItem('irlrpg_wuz_here_used')) {
+			wuzHerePulse = true;
 		}
 	});
 </script>
@@ -291,7 +305,7 @@
 />
 
 {#if data.user}
-	<button class="wuz-here-fab" onclick={() => wuzHere.open()}>Wuz Here</button>
+	<button class="wuz-here-fab" class:pulse={wuzHerePulse} onclick={handleWuzHereClick}>Wuz Here</button>
 {/if}
 
 <WuzHere bind:this={wuzHere} onDone={invalidateAll} center={mapCenter} />
@@ -496,5 +510,14 @@
 		padding: 0.6rem 1.25rem;
 		font-size: 0.9rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	.wuz-here-fab.pulse {
+		animation: wuz-pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes wuz-pulse {
+		0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
+		50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--pico-primary) 30%, transparent), 0 2px 8px rgba(0, 0, 0, 0.2); }
 	}
 </style>

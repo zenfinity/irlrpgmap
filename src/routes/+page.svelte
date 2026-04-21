@@ -517,7 +517,7 @@
 	}
 
 	@keyframes wuz-pulse {
-		0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
-		50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--pico-primary) 30%, transparent), 0 2px 8px rgba(0, 0, 0, 0.2); }
+		0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); transform: scale(1); }
+		50% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--pico-primary) 35%, transparent), 0 2px 8px rgba(0, 0, 0, 0.2); transform: scale(1.08); }
 	}
 </style>

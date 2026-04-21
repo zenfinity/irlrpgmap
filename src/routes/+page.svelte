@@ -124,6 +124,9 @@
 	{/if}
 	<nav>
 		<ul>
+			{#if !data.user}
+				<li><span class="start-here">start here →</span></li>
+			{/if}
 			<li class="account-btn-wrap">
 				<button class="account-btn" onclick={openModal}>
 					{data.user ? data.user.name : 'Sign in'}
@@ -283,6 +286,8 @@
 	details {
 		align-self: center;
 		margin: 0;
+		position: relative;
+		z-index: 20;
 	}
 
 	summary:focus-visible {
@@ -304,6 +309,18 @@
 
 	.mobile-menu-account {
 		display: none;
+	}
+
+	.start-here {
+		font-size: 0.75rem;
+		color: var(--pico-muted-color);
+		animation: pulse 2s ease-in-out infinite;
+		white-space: nowrap;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 0.3; }
+		50% { opacity: 1; }
 	}
 
 	@media (max-width: 480px) {

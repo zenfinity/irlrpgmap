@@ -26,6 +26,11 @@
 	$effect(() => {
 		const n = activeNeighborhood;
 		if (!n) { neighborhoodData = null; return; }
+		// No-neighborhood places grouped under sentinel — no polygon to fetch
+		if (n === '__ungrouped__') {
+			neighborhoodData = { polygon: null, userPolygon: null, completionPct: null };
+			return;
+		}
 		// Seed boundary immediately from already-loaded page data so the dungeon
 		// wall appears without waiting for the API round-trip
 		const cached = data.neighborhoods.find((nb) => nb.name === n);
@@ -145,7 +150,7 @@
 		<nav class="tabs">
 			<button class="tab" onclick={() => activeNeighborhood = null}>World</button>
 			<button class="tab active">
-				{activeNeighborhood}{neighborhoodData?.completionPct != null ? ` · ${neighborhoodData.completionPct}%` : ''}
+				{activeNeighborhood === '__ungrouped__' ? 'Uncharted' : activeNeighborhood}{neighborhoodData?.completionPct != null ? ` · ${neighborhoodData.completionPct}%` : ''}
 			</button>
 		</nav>
 	{/if}

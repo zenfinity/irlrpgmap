@@ -18,9 +18,9 @@
 
 	/** Places visible in the current view (all in world, filtered in area) */
 	const visiblePlaces = $derived(
-		activeNeighborhood
-			? places.filter((p) => p.neighborhood === activeNeighborhood)
-			: places
+		!activeNeighborhood ? places
+		: activeNeighborhood === '__ungrouped__' ? places.filter((p) => !p.neighborhood)
+		: places.filter((p) => p.neighborhood === activeNeighborhood)
 	);
 
 	/**
@@ -383,14 +383,14 @@
 			// Click handlers
 			map.on('click', 'clusters', (e) => {
 				const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-				const neighborhood = features[0]?.properties?.neighborhood;
-				if (neighborhood && onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
+				const neighborhood = features[0]?.properties?.neighborhood || '__ungrouped__';
+				if (onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
 			});
 
 			map.on('click', 'pins', (e) => {
 				const features = map.queryRenderedFeatures(e.point, { layers: ['pins'] });
-				const neighborhood = features[0]?.properties?.neighborhood;
-				if (neighborhood && onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
+				const neighborhood = features[0]?.properties?.neighborhood || '__ungrouped__';
+				if (onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
 			});
 
 			const popup = new mapboxgl.Popup({
@@ -419,7 +419,7 @@
 				if (!feature) return;
 				const label = activeNeighborhood
 					? feature?.properties?.name
-					: feature?.properties?.neighborhood ?? null;
+					: (feature?.properties?.neighborhood ?? feature?.properties?.name ?? null);
 				if (!label) return;
 				const coords = /** @type {[number, number]} */ ((/** @type {any} */ (feature.geometry)).coordinates.slice());
 				popup.setLngLat(coords).setText(label).addTo(map);

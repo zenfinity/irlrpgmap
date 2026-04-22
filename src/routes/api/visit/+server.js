@@ -21,7 +21,7 @@ export async function POST({ request, locals }) {
 	const visits = body.visits;
 	if (!Array.isArray(visits) || visits.length === 0) error(400, 'No visits provided');
 
-	const neighborhoodMap = await geocodeNeighborhoods(visits.map((v) => ({ placeId: null, lat: v.lat, lng: v.lng })));
+	const geocodeMap = await geocodeNeighborhoods(visits.map((v) => ({ placeId: null, lat: v.lat, lng: v.lng })));
 
 	const rows = await sql`
 		INSERT INTO visits (user_id, lat, lng, name, place_id, start_time, end_time, dwell_minutes, confidence, source, knowledge_type, neighborhood)
@@ -36,7 +36,7 @@ export async function POST({ request, locals }) {
 			${visits.map((v) => v.dwellMinutes)}::float8[],
 			${visits.map((v) => v.confidence)}::float8[],
 			${visits.map((v) => v.source ?? 'manual')}::text[],
-			${visits.map((v) => neighborhoodMap.get(geocodeKey(null, v.lat, v.lng)) ?? null)}::text[]
+			${visits.map((v) => geocodeMap.get(geocodeKey(null, v.lat, v.lng))?.neighborhood ?? null)}::text[]
 		) AS t(lat, lng, name, place_id, start_time, end_time, dwell_minutes, confidence, source, neighborhood)
 		ON CONFLICT DO NOTHING
 		RETURNING id

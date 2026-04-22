@@ -103,39 +103,71 @@
 			// Area view
 			const boundary = neighborhoodData?.polygon;
 
+			// Two-pass reveal strategy:
+			//   Pass 1 — tiny sharp circles at each pin center, stamped at full opacity
+			//             so pins are always visible through the fog regardless of overlap.
+			//   Pass 2 — wider soft glow for "explored area" ambiance, stamped at low
+			//             opacity (0.35) so compounding glows can't saturate into a blob.
+
+			const pinOff = new OffscreenCanvas(width, height);
+			const pctx = /** @type {OffscreenCanvasRenderingContext2D} */ (pinOff.getContext('2d'));
+			pctx.globalCompositeOperation = 'source-over';
+
+			const glowOff = new OffscreenCanvas(width, height);
+			const gctx = /** @type {OffscreenCanvasRenderingContext2D} */ (glowOff.getContext('2d'));
+			gctx.globalCompositeOperation = 'source-over';
+
+			for (const place of visiblePlaces) {
+				if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
+				const { x, y } = map.project([place.lng, place.lat]);
+				if (!isFinite(x) || !isFinite(y)) continue;
+				const score = place.familiarityScore;
+
+				// Pass 1: sharp pin reveal (always at least 14px, up to ~25m real-world)
+				const pinPx = Math.max(14, metersToPixels(20, zoom, place.lat));
+				const pinGrad = pctx.createRadialGradient(x, y, 0, x, y, pinPx);
+				pinGrad.addColorStop(0.5, 'rgba(0,0,0,1)');
+				pinGrad.addColorStop(1, 'rgba(0,0,0,0)');
+				pctx.fillStyle = pinGrad;
+				pctx.beginPath();
+				pctx.arc(x, y, pinPx, 0, Math.PI * 2);
+				pctx.fill();
+
+				// Pass 2: soft ambient glow (60–160m radius, alpha 0.6–0.9 on glow canvas)
+				const glowRadius = metersToPixels(60 + score * 100, zoom, place.lat);
+				if (!isFinite(glowRadius) || glowRadius <= 0) continue;
+				const glowGrad = gctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+				glowGrad.addColorStop(0, `rgba(0,0,0,${0.6 + score * 0.3})`);
+				glowGrad.addColorStop(0.5, `rgba(0,0,0,${0.3 + score * 0.2})`);
+				glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+				gctx.fillStyle = glowGrad;
+				gctx.beginPath();
+				gctx.arc(x, y, glowRadius, 0, Math.PI * 2);
+				gctx.fill();
+			}
+
 			if (boundary) {
 				// Subtly lighten inside the boundary — shows the explorable area exists
 				ctx.globalAlpha = 0.18;
 				buildPolygonPath(ctx, map, boundary);
 				ctx.fill();
 
-				// Clip circle reveals to boundary so fog can't bleed past the walls
 				ctx.save();
 				buildPolygonPath(ctx, map, boundary);
 				ctx.clip();
 
+				// Glow pass first (bounded at 35% removal — can't blob even with many overlaps)
+				ctx.globalCompositeOperation = 'destination-out';
+				ctx.globalAlpha = 0.35;
+				ctx.drawImage(glowOff, 0, 0);
+
+				// Pin pass on top at full opacity — pins always punched through
+				ctx.globalCompositeOperation = 'destination-out';
 				ctx.globalAlpha = 1;
-				for (const place of visiblePlaces) {
-					if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
-					const { x, y } = map.project([place.lng, place.lat]);
-					const score = place.familiarityScore;
-					const innerMeters = 100 + score * 600;
-					const outerMeters = innerMeters + 200;
-					const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
-					const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
-					if (!isFinite(x) || !isFinite(y) || !isFinite(outerRadius) || outerRadius <= 0) continue;
-					const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
-					gradient.addColorStop(0, `rgba(0,0,0,${0.3 + score * 0.7})`);
-					gradient.addColorStop(0.55, `rgba(0,0,0,${0.15 + score * 0.4})`);
-					gradient.addColorStop(innerRadius / outerRadius, 'rgba(0,0,0,0)');
-					gradient.addColorStop(1, 'rgba(0,0,0,0)');
-					ctx.fillStyle = gradient;
-					ctx.beginPath();
-					ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
-					ctx.fill();
-				}
+				ctx.drawImage(pinOff, 0, 0);
 
 				ctx.restore();
+
 				ctx.globalCompositeOperation = 'source-over';
 				ctx.globalAlpha = 1;
 
@@ -157,27 +189,13 @@
 					});
 				}
 			} else {
-				// No boundary — fall back to circles
+				// No boundary — stamp reveals directly
+				ctx.globalCompositeOperation = 'destination-out';
+				ctx.globalAlpha = 0.35;
+				ctx.drawImage(glowOff, 0, 0);
+				ctx.globalCompositeOperation = 'destination-out';
 				ctx.globalAlpha = 1;
-				for (const place of visiblePlaces) {
-					if (!isFinite(place.lng) || !isFinite(place.lat)) continue;
-					const { x, y } = map.project([place.lng, place.lat]);
-					const score = place.familiarityScore;
-					const innerMeters = 100 + score * 600;
-					const outerMeters = innerMeters + 200;
-					const innerRadius = metersToPixels(innerMeters, zoom, place.lat);
-					const outerRadius = metersToPixels(outerMeters, zoom, place.lat);
-					if (!isFinite(x) || !isFinite(y) || !isFinite(outerRadius) || outerRadius <= 0) continue;
-					const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerRadius);
-					gradient.addColorStop(0, `rgba(0,0,0,${0.3 + score * 0.7})`);
-					gradient.addColorStop(0.55, `rgba(0,0,0,${0.15 + score * 0.4})`);
-					gradient.addColorStop(innerRadius / outerRadius, 'rgba(0,0,0,0)');
-					gradient.addColorStop(1, 'rgba(0,0,0,0)');
-					ctx.fillStyle = gradient;
-					ctx.beginPath();
-					ctx.arc(x, y, outerRadius, 0, Math.PI * 2);
-					ctx.fill();
-				}
+				ctx.drawImage(pinOff, 0, 0);
 				ctx.globalCompositeOperation = 'source-over';
 				ctx.globalAlpha = 1;
 			}
@@ -247,15 +265,17 @@
 		ctx.setLineDash(style.lineDash);
 
 		for (const ring of rings) {
-			if (!ring.length) continue;
+			if (!ring?.length) continue;
 			ctx.beginPath();
-			for (let i = 0; i < ring.length; i++) {
-				const { x, y } = map.project(ring[i]);
-				if (i === 0) ctx.moveTo(x, y);
+			let started = false;
+			for (const coord of ring) {
+				if (!Array.isArray(coord) || !isFinite(coord[0]) || !isFinite(coord[1])) continue;
+				const { x, y } = map.project(/** @type {[number,number]} */ (coord));
+				if (!isFinite(x) || !isFinite(y)) continue;
+				if (!started) { ctx.moveTo(x, y); started = true; }
 				else ctx.lineTo(x, y);
 			}
-			ctx.closePath();
-			ctx.stroke();
+			if (started) { ctx.closePath(); ctx.stroke(); }
 		}
 
 		ctx.setLineDash([]);
@@ -450,30 +470,33 @@
 				offset: [0, -10]
 			});
 
-			// World view: click fog reveal to enter Area view; hover lifts name to header
+			// World view: click fog reveal to enter Area view
 			for (const layer of ['neighborhood-fills', 'neighborhood-centroids']) {
 				map.on('click', layer, (e) => {
 					if (activeNeighborhood) return;
 					const name = e.features?.[0]?.properties?.name;
 					if (name && onNeighborhoodSelect) onNeighborhoodSelect(name);
 				});
-				map.on('mouseenter', layer, (e) => {
-					if (activeNeighborhood) return;
-					const name = e.features?.[0]?.properties?.name ?? null;
-					onNeighborhoodHover?.(name);
-				});
-				map.on('mouseleave', layer, () => {
-					if (activeNeighborhood) return;
-					onNeighborhoodHover?.(null);
-				});
 			}
 
-			// Ungrouped pins (no neighborhood) — still need a click target in World view
-			map.on('click', 'pins', (e) => {
+			// World view: mousemove to update header name — avoids enter/leave
+			// ordering issues when moving between adjacent polygons
+			map.on('mousemove', (e) => {
 				if (activeNeighborhood) return;
+				const features = map.queryRenderedFeatures(e.point, { layers: ['neighborhood-fills', 'neighborhood-centroids'] });
+				onNeighborhoodHover?.(features[0]?.properties?.name ?? null);
+			});
+
+			map.on('click', 'pins', (e) => {
 				const features = map.queryRenderedFeatures(e.point, { layers: ['pins'] });
-				const neighborhood = features[0]?.properties?.neighborhood;
-				if (!neighborhood && onNeighborhoodSelect) onNeighborhoodSelect('__ungrouped__');
+				const neighborhood = features[0]?.properties?.neighborhood || '__ungrouped__';
+				if (!activeNeighborhood) {
+					// World view: ungrouped pins only (neighborhood pins handled by neighborhood-fills)
+					if (neighborhood === '__ungrouped__' && onNeighborhoodSelect) onNeighborhoodSelect('__ungrouped__');
+				} else if (neighborhood !== activeNeighborhood) {
+					// Area view: clicking a pin from a different area navigates there
+					if (onNeighborhoodSelect) onNeighborhoodSelect(neighborhood);
+				}
 			});
 
 			// Area view: hover pin to show place details

@@ -1,23 +1,26 @@
 import { VITE_MAPBOX_TOKEN } from '$env/static/private';
 
 /**
- * Try Mapbox reverse geocode — returns the most granular neighborhood/locality
- * from the context hierarchy, or null if none found.
+ * Try Mapbox reverse geocode — returns neighborhood from context hierarchy,
+ * and POI name from the primary feature if it's typed as a poi.
  * @param {number} lat
  * @param {number} lng
- * @returns {Promise<string|null>}
+ * @returns {Promise<{neighborhood: string|null, poiName: string|null}>}
  */
 async function geocodeViaMapbox(lat, lng) {
 	const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${VITE_MAPBOX_TOKEN}`;
 	const res = await fetch(url);
-	if (!res.ok) return null;
+	if (!res.ok) return { neighborhood: null, poiName: null };
 	const data = await res.json();
-	const ctx = data.features?.[0]?.context ?? [];
+	const feature = data.features?.[0];
+	const ctx = feature?.context ?? [];
 	const match = ctx.find(
 		/** @param {{id: string, text: string}} c */
 		(c) => c.id.startsWith('neighborhood.') || c.id.startsWith('locality.')
 	);
-	return match?.text ?? null;
+	const neighborhood = match?.text ?? null;
+	const poiName = feature?.place_type?.includes('poi') ? (feature.text ?? null) : null;
+	return { neighborhood, poiName };
 }
 
 /**
@@ -35,17 +38,16 @@ async function geocodeViaNominatim(lat, lng) {
 	if (!res.ok) return null;
 	const data = await res.json();
 	const addr = data.address ?? {};
-	// Pick the most granular sub-city label available, including commercial/industrial zones
 	return addr.neighbourhood ?? addr.suburb ?? addr.quarter ?? addr.city_district ?? addr.retail ?? addr.commercial ?? addr.industrial ?? null;
 }
 
 /**
- * Reverse-geocode a set of locations to neighborhood names.
- * Tries Mapbox first; falls back to Nominatim for any nulls.
+ * Reverse-geocode a set of locations to neighborhood names and POI names.
+ * Tries Mapbox first; falls back to Nominatim for any null neighborhoods.
  * Deduplicates by placeId (or rounded lat/lng for places without one).
  *
  * @param {Array<{placeId?: string|null, lat: number, lng: number}>} locations
- * @returns {Promise<Map<string, string|null>>} key → neighborhood name or null
+ * @returns {Promise<Map<string, {neighborhood: string|null, poiName: string|null}>>}
  */
 export async function geocodeNeighborhoods(locations) {
 	/** @type {Map<string, {lat: number, lng: number}>} */
@@ -55,7 +57,7 @@ export async function geocodeNeighborhoods(locations) {
 		if (!unique.has(key)) unique.set(key, { lat: loc.lat, lng: loc.lng });
 	}
 
-	/** @type {Map<string, string|null>} */
+	/** @type {Map<string, {neighborhood: string|null, poiName: string|null}>} */
 	const results = new Map();
 
 	// Phase 1: try Mapbox for all locations in parallel
@@ -64,19 +66,20 @@ export async function geocodeNeighborhoods(locations) {
 			try {
 				results.set(key, await geocodeViaMapbox(lat, lng));
 			} catch {
-				results.set(key, null);
+				results.set(key, { neighborhood: null, poiName: null });
 			}
 		})
 	);
 
-	// Phase 2: Nominatim fallback for any that came back null — sequential to
-	// respect the 1 req/sec policy
+	// Phase 2: Nominatim fallback for any that came back without a neighborhood —
+	// sequential to respect the 1 req/sec policy
 	for (const [key, val] of results) {
-		if (val !== null) continue;
+		if (val.neighborhood !== null) continue;
 		const loc = unique.get(key);
 		if (!loc) continue;
 		try {
-			results.set(key, await geocodeViaNominatim(loc.lat, loc.lng));
+			const neighborhood = await geocodeViaNominatim(loc.lat, loc.lng);
+			results.set(key, { ...val, neighborhood });
 		} catch {
 			// leave null
 		}

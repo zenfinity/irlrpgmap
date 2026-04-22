@@ -38,10 +38,13 @@ export async function POST({ request, locals }) {
 		return json({ imported: 0 });
 	}
 
-	const neighborhoodMap = await geocodeNeighborhoods(visits);
+	const geocodeMap = await geocodeNeighborhoods(visits);
 
 	/** @param {typeof visits[0]} v */
-	const getNeighborhood = (v) => neighborhoodMap.get(geocodeKey(v.placeId, v.lat, v.lng)) ?? null;
+	const getNeighborhood = (v) => geocodeMap.get(geocodeKey(v.placeId, v.lat, v.lng))?.neighborhood ?? null;
+
+	/** @param {typeof visits[0]} v */
+	const getName = (v) => v.name ?? geocodeMap.get(geocodeKey(v.placeId, v.lat, v.lng))?.poiName ?? null;
 
 	let imported = 0;
 	for (let i = 0; i < visits.length; i += BATCH_SIZE) {
@@ -53,7 +56,7 @@ export async function POST({ request, locals }) {
 			FROM unnest(
 				${batch.map((v) => v.lat)}::float8[],
 				${batch.map((v) => v.lng)}::float8[],
-				${batch.map((v) => v.name)}::text[],
+				${batch.map((v) => getName(v))}::text[],
 				${batch.map((v) => v.placeId)}::text[],
 				${batch.map((v) => v.start)}::timestamptz[],
 				${batch.map((v) => v.end)}::timestamptz[],

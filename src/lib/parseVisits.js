@@ -25,14 +25,14 @@
  */
 
 /**
- * Parse Google Takeout Semantic Location History JSON
+ * Parse Google Takeout Semantic Location History JSON (old format)
  * and convert to an array of visit objects with real coordinates
  * and dwell time in minutes
  *
  * @param {TakeoutJson} takeoutJson
  * @returns {Visit[]}
  */
-export function parseVisits(takeoutJson) {
+function parseLegacyTakeout(takeoutJson) {
 	return takeoutJson.timelineObjects
 		.filter((obj) => obj.placeVisit)
 		.map((obj) => {
@@ -49,13 +49,79 @@ export function parseVisits(takeoutJson) {
 				lng,
 				name: visit.location.name || null,
 				placeId: visit.location.placeId || null,
-				neighborhood: null, // populated server-side after geocoding
+				neighborhood: null,
 				start,
 				end,
 				dwellMinutes,
 				confidence: visit.visitConfidence || 0
 			};
 		});
+}
+
+/**
+ * Parse the new Google Maps on-device Timeline export format.
+ * Root is an array; visits have a `visit` key with topCandidate.placeLocation.
+ *
+ * @param {Array<any>} entries
+ * @returns {Visit[]}
+ */
+function parseNewTimeline(entries) {
+	/** @type {Visit[]} */
+	const visits = [];
+
+	for (const entry of entries) {
+		if (!entry.visit) continue; // skip activity/travel segments
+
+		const candidate = entry.visit.topCandidate;
+		if (!candidate?.placeLocation) continue;
+
+		// placeLocation is "geo:lat,lng"
+		const geoMatch = candidate.placeLocation.match(/^geo:([-\d.]+),([-\d.]+)$/);
+		if (!geoMatch) continue;
+
+		const lat = parseFloat(geoMatch[1]);
+		const lng = parseFloat(geoMatch[2]);
+		if (!isFinite(lat) || !isFinite(lng)) continue;
+
+		const start = new Date(entry.startTime);
+		const end = new Date(entry.endTime);
+		const dwellMinutes = (end.getTime() - start.getTime()) / 1000 / 60;
+
+		// Use semanticType as name when it's meaningful
+		const semanticType = candidate.semanticType;
+		const name = (semanticType && semanticType !== 'Unknown') ? semanticType : null;
+
+		visits.push({
+			lat,
+			lng,
+			name,
+			placeId: candidate.placeID || null,
+			neighborhood: null,
+			start,
+			end,
+			dwellMinutes,
+			confidence: parseFloat(candidate.probability ?? '0') || 0
+		});
+	}
+
+	return visits;
+}
+
+/**
+ * Parse a Google location history export — auto-detects old Takeout format
+ * ({ timelineObjects: [...] }) and new on-device Timeline format ([...]).
+ *
+ * @param {any} data
+ * @returns {Visit[]}
+ */
+export function parseVisits(data) {
+	if (Array.isArray(data)) {
+		return parseNewTimeline(data);
+	}
+	if (data?.timelineObjects) {
+		return parseLegacyTakeout(data);
+	}
+	throw new Error('Unrecognised format');
 }
 
 /**

@@ -236,7 +236,7 @@ select {
 	border-radius: var(--radius);
 	color: var(--color-text);
 	font-family: 'Barlow', sans-serif;
-	font-size: 0.9rem;
+	font-size: max(0.9rem, 16px);
 	outline: none;
 	transition: border-color 0.15s, box-shadow 0.15s;
 	margin-top: 0.3rem;

@@ -2,9 +2,9 @@
 
 A personal map that reveals the world as you explore it — like fog of war in an RPG, but for real life.
 
-Log places you've been and watch your map come alive. The more you've explored a neighborhood, the more the fog lifts — down to its real boundary shape.
+Log places you've been and watch your map come alive. The more you've explored a neighborhood, the more the fog lifts.
 
-![irlrpgmap screenshot](https://www.irlrpgmap.live/screenshot.jpeg?v=2)
+![irlrpgmap screenshot](https://www.irlrpgmap.live/screenshot.png)
 
 **[irlrpgmap.live](https://www.irlrpgmap.live)**
 
@@ -29,7 +29,7 @@ In the **World view**, each neighborhood you've visited appears as a soft fog re
 - **[Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/)** — map rendering and fog of war overlay
 - **[Neon](https://neon.tech)** — serverless Postgres with PostGIS for neighborhood geometry
 - **[Better Auth](https://better-auth.com)** — authentication
-- **[PicoCSS](https://picocss.com)** — minimal styling
+- **Custom CSS** — Dusk theme (light/dark), DOS terminal aesthetic, [Barlow](https://fonts.google.com/specimen/Barlow) + [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P)
 - **[Vercel](https://vercel.com)** — hosting
 
 ---

@@ -370,6 +370,10 @@
 		outline: none;
 	}
 
+	.page-header > nav {
+		margin-left: auto;
+	}
+
 	nav > ul {
 		display: flex;
 		align-items: center;

@@ -1,19 +1,372 @@
-@import '@picocss/pico/css/pico.indigo.min.css';
+/* ── DESIGN TOKENS ───────────────────────────────────────────────── */
 
 :root {
 	--header-height: 3rem;
-	--fog-color: rgba(140, 155, 175, 0.85);
+
+	/* Dusk dark (default) */
+	--fog-color: rgba(16, 6, 38, 0.93);
+	--color-bg: #1a1033;
+	--color-surface: #201440;
+	--color-surface-raised: #2a1d52;
+	--color-border: rgba(167, 139, 250, 0.2);
+	--color-text: #f0e8ff;
+	--color-text-muted: #8b7aaa;
+	--color-accent: #a78bfa;
+	--color-accent-text: #1a1033;
+	--color-accent-dim: rgba(167, 139, 250, 0.14);
+	--color-danger: #f87171;
+	--radius: 0;
+	--radius-lg: 0;
+	--shadow: 4px 4px 0 var(--color-accent-dim);
+	--color-btn-hover-shadow: var(--color-accent);
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--fog-color: rgba(100, 80, 140, 0.78);
+		--color-bg: #f5f3ff;
+		--color-surface: #ffffff;
+		--color-surface-raised: #ede9f8;
+		--color-border: rgba(91, 33, 182, 0.16);
+		--color-text: #1e1035;
+		--color-text-muted: #6b5a8a;
+		--color-accent: #5b21b6;
+		--color-accent-text: #ffffff;
+		--color-accent-dim: rgba(91, 33, 182, 0.1);
+		--color-danger: #dc2626;
+		--shadow: 4px 4px 0 var(--color-accent-dim);
+		--color-btn-hover-shadow: var(--color-accent-text);
+	}
+}
+
+/* Explicit overrides — always beat the system preference */
+:root[data-theme='dark'] {
+	--fog-color: rgba(16, 6, 38, 0.93);
+	--color-bg: #1a1033;
+	--color-surface: #201440;
+	--color-surface-raised: #2a1d52;
+	--color-border: rgba(167, 139, 250, 0.2);
+	--color-text: #f0e8ff;
+	--color-text-muted: #8b7aaa;
+	--color-accent: #a78bfa;
+	--color-accent-text: #1a1033;
+	--color-accent-dim: rgba(167, 139, 250, 0.14);
+	--color-danger: #f87171;
+	--shadow: 4px 4px 0 var(--color-accent-dim);
+	--color-btn-hover-shadow: var(--color-accent);
+}
+
+:root[data-theme='light'] {
+	--fog-color: rgba(100, 80, 140, 0.78);
+	--color-bg: #f5f3ff;
+	--color-surface: #ffffff;
+	--color-surface-raised: #ede9f8;
+	--color-border: rgba(91, 33, 182, 0.16);
+	--color-text: #1e1035;
+	--color-text-muted: #6b5a8a;
+	--color-accent: #5b21b6;
+	--color-accent-text: #ffffff;
+	--color-accent-dim: rgba(91, 33, 182, 0.1);
+	--color-danger: #dc2626;
+	--shadow: 4px 4px 0 var(--color-accent-dim);
+	--color-btn-hover-shadow: var(--color-accent-text);
+}
+
+/* ── RESET ───────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: 'Barlow', system-ui, sans-serif;
+	font-size: 1rem;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ── TYPOGRAPHY ──────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Press Start 2P', monospace;
+	line-height: 1.6;
+	margin: 0 0 0.75rem;
+}
+
+p { margin: 0 0 0.75rem; }
+p:last-child { margin-bottom: 0; }
+
+a {
+	color: var(--color-accent);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+a:hover { opacity: 0.8; }
+
+strong { font-weight: 600; }
+
+hr {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: 0.3rem 0;
+}
+
+/* ── HEADER (background/border only — layout in component) ───────── */
+
+.page-header {
+	background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+	border-bottom: 1px solid var(--color-border);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	padding: 0 1rem;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────────────── */
+
+button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-family: 'Press Start 2P', monospace;
+	font-size: 0.6rem;
+	line-height: 1.4;
+	letter-spacing: 0.03em;
+	padding: 0.65em 1.1em;
+	background: var(--color-accent);
+	color: var(--color-accent-text);
+	border: 1.5px solid transparent;
+	border-radius: var(--radius);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: opacity 0.15s, transform 0.1s;
+}
+
+button:hover:not(:disabled) { box-shadow: 2px 2px 0 var(--color-btn-hover-shadow); }
+button:active:not(:disabled) { box-shadow: none; transform: translate(2px, 2px); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+button.secondary,
+button.outline.secondary {
+	background: transparent;
+	border-color: var(--color-border);
+	color: var(--color-text-muted);
+}
+
+button.outline {
+	background: transparent;
+	border-color: var(--color-accent);
+	color: var(--color-accent);
 }
 
 button.link {
-	display: inline;
-	width: auto;
-	margin: 0;
+	font-family: 'Barlow', sans-serif;
+	font-size: inherit;
+	font-weight: 500;
+	letter-spacing: 0;
+	background: none;
+	border-color: transparent;
+	color: var(--color-accent);
 	padding: 0;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	display: inline;
+}
+
+/* Loading spinner */
+button[aria-busy='true'] {
+	position: relative;
+	color: transparent;
+	pointer-events: none;
+}
+button[aria-busy='true']::after {
+	content: '';
+	position: absolute;
+	top: 50%; left: 50%;
+	width: 0.85em; height: 0.85em;
+	margin: -0.425em 0 0 -0.425em;
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	border-top-color: rgba(255, 255, 255, 0.9);
+	border-radius: 50%;
+	animation: _spin 0.55s linear infinite;
+}
+button.outline[aria-busy='true']::after,
+button.secondary[aria-busy='true']::after {
+	border-color: var(--color-border);
+	border-top-color: var(--color-accent);
+}
+@keyframes _spin { to { transform: rotate(360deg); } }
+
+/* Close (×) button */
+button.close {
+	font-family: system-ui, sans-serif;
+	font-size: 1.3rem;
+	line-height: 1;
+	padding: 0.1rem 0.4rem;
+	background: none;
+	border-color: transparent;
+	color: var(--color-text-muted);
+	letter-spacing: 0;
+}
+button.close::after { content: '×'; }
+button.close:hover { color: var(--color-text); opacity: 1; }
+
+/* ── FORMS ───────────────────────────────────────────────────────── */
+
+label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--color-text-muted);
+	margin-bottom: 0.85rem;
+}
+
+input:not([type='file']):not([type='checkbox']):not([type='radio']),
+textarea,
+select {
+	display: block;
+	width: 100%;
+	padding: 0.55rem 0.75rem;
+	background: var(--color-surface-raised);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	color: var(--color-text);
+	font-family: 'Barlow', sans-serif;
+	font-size: 0.9rem;
+	outline: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+	margin-top: 0.3rem;
+}
+
+input:focus:not([type='file']):not([type='checkbox']):not([type='radio']),
+textarea:focus,
+select:focus {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 3px var(--color-accent-dim);
+}
+
+input[type='file'] { display: none; }
+textarea { resize: vertical; min-height: 6rem; }
+
+/* Dark-mode calendar picker icon */
+input[type='date']::-webkit-calendar-picker-indicator {
+	filter: invert(0.6);
+	cursor: pointer;
+}
+:root[data-theme='light'] input[type='date']::-webkit-calendar-picker-indicator {
+	filter: none;
+}
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']) input[type='date']::-webkit-calendar-picker-indicator {
+		filter: none;
+	}
+}
+
+/* ── DIALOG / MODAL ──────────────────────────────────────────────── */
+
+dialog {
+	padding: 0;
+	border: 2px double var(--color-border);
+	background: var(--color-surface);
+	color: var(--color-text);
+	box-shadow: var(--shadow);
+	max-height: 88vh;
+	overflow-y: auto;
+}
+
+dialog::backdrop {
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(3px);
+	-webkit-backdrop-filter: blur(3px);
+}
+
+dialog article { padding: 1.5rem; }
+
+dialog > article > header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1.25rem;
+}
+
+dialog > article > header h3 {
+	font-size: 0.6rem;
+	margin: 0;
+	color: var(--color-accent);
+}
+
+dialog > article > footer {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 1.25rem;
+}
+
+/* ── DROPDOWN (details/summary) ──────────────────────────────────── */
+
+details { position: relative; }
+
+details > summary {
+	list-style: none;
+	cursor: pointer;
+	padding: 0.5rem;
+	border-radius: var(--radius);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	color: var(--color-text);
+	transition: background 0.15s;
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary {
+	font-size: 1.4rem;
+	font-family: system-ui, sans-serif;
+	letter-spacing: 0;
+	color: var(--color-text-muted);
+}
+details > summary:hover { background: var(--color-accent-dim); color: var(--color-text); }
+
+details[open] > ul {
+	display: block;
+	position: absolute;
+	right: 0;
+	top: calc(100% + 0.35rem);
+	min-width: 13rem;
+	background: var(--color-surface);
+	border: 2px double var(--color-border);
+	box-shadow: var(--shadow);
+	padding: 0.3rem 0;
+	z-index: 30;
+	list-style: none;
+	margin: 0;
+}
+details > ul { display: none; }
+
+details > ul > li > a,
+details > ul > li > button {
+	display: block;
+	width: 100%;
+	padding: 0.6rem 1rem;
+	font-family: 'Barlow', sans-serif;
+	font-size: 0.875rem;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-align: left;
 	background: none;
 	border: none;
-	color: var(--pico-primary);
-	font-size: inherit;
+	color: var(--color-text);
+	text-decoration: none;
 	cursor: pointer;
-	text-decoration: underline;
+	border-radius: 0;
+	transition: background 0.1s, color 0.1s;
+}
+details > ul > li > a:hover,
+details > ul > li > button:hover {
+	background: var(--color-accent-dim);
+	color: var(--color-accent);
+	opacity: 1;
 }

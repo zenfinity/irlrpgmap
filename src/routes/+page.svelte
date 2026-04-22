@@ -123,6 +123,7 @@
 	}
 
 	let wuzHerePulse = $state(false);
+	let effectiveTheme = $state(/** @type {'dark'|'light'} */ ('dark'));
 
 	function dismissWelcome() {
 		localStorage.setItem('irlrpg_welcomed', '1');
@@ -135,7 +136,21 @@
 		wuzHere.open();
 	}
 
+	function toggleTheme() {
+		const next = effectiveTheme === 'dark' ? 'light' : 'dark';
+		effectiveTheme = next;
+		localStorage.setItem('irlrpg_theme', next);
+		document.documentElement.dataset.theme = next;
+		dropdown.open = false;
+	}
+
 	onMount(() => {
+		const saved = localStorage.getItem('irlrpg_theme');
+		if (saved === 'dark' || saved === 'light') {
+			effectiveTheme = saved;
+		} else {
+			effectiveTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+		}
 		if (!localStorage.getItem('irlrpg_welcomed')) {
 			welcomeDialog.showModal();
 		}
@@ -145,7 +160,7 @@
 	});
 </script>
 
-<header>
+<header class="page-header">
 	<span class="wordmark">irlrpgmap</span>
 	{#if activeNeighborhood}
 		<nav class="tabs">
@@ -162,25 +177,27 @@
 			{#if !data.user}
 				<li><span class="start-here">start here →</span></li>
 			{/if}
-			<li class="account-btn-wrap">
-				<button class="account-btn" onclick={openModal}>
-					{data.user ? data.user.name : 'Sign in'}
-				</button>
-			</li>
 			<li>
 				<details class="dropdown" bind:this={dropdown}>
-					<summary></summary>
-					<ul dir="rtl">
-						<li class="mobile-menu-account">
+					<summary aria-label="Menu">⋮</summary>
+					<ul>
+						<li>
 							<button onclick={() => { dropdown.open = false; openModal(); }}>
 								{data.user ? data.user.name : 'Sign in'}
 							</button>
 						</li>
+						<li><hr /></li>
 						<li>
 							<a href="https://github.com/zenfinity/irlrpgmap" target="_blank" rel="noopener" onclick={() => dropdown.open = false}>GitHub</a>
 						</li>
 						<li>
 							<button onclick={openFeedback}>Feedback</button>
+						</li>
+						<li><hr /></li>
+						<li>
+							<button onclick={toggleTheme}>
+								{effectiveTheme === 'dark' ? '☀ Light mode' : '◑ Dark mode'}
+							</button>
 						</li>
 					</ul>
 				</details>
@@ -193,8 +210,8 @@
 	<article>
 		{#if data.user}
 			<header>
-				<button class="close" aria-label="Close" onclick={() => dialog.close()}></button>
 				<h3>{data.user.name}</h3>
+				<button class="close" aria-label="Close" onclick={() => dialog.close()}></button>
 			</header>
 			{#if data.places.length > 0}
 				<div class="account-actions">
@@ -219,8 +236,8 @@
 			</footer>
 		{:else}
 			<header>
-				<button class="close" aria-label="Close" onclick={() => dialog.close()}></button>
 				<h3>{authMode === 'new' ? 'Create account' : 'Sign in'}</h3>
+				<button class="close" aria-label="Close" onclick={() => dialog.close()}></button>
 			</header>
 			<form onsubmit={(e) => { e.preventDefault(); handleAuth(); }}>
 				{#if authMode === 'new'}
@@ -260,8 +277,8 @@
 <dialog bind:this={feedbackDialog}>
 	<article>
 		<header>
-			<button class="close" aria-label="Close" onclick={() => feedbackDialog.close()}></button>
 			<h3>Feedback</h3>
+			<button class="close" aria-label="Close" onclick={() => feedbackDialog.close()}></button>
 		</header>
 		{#if feedbackDone}
 			<p>Thanks! Your feedback has been submitted.</p>
@@ -309,6 +326,7 @@
 	neighborhoods={data.neighborhoods}
 	{activeNeighborhood}
 	{neighborhoodData}
+	theme={effectiveTheme}
 	onNeighborhoodSelect={(name) => { activeNeighborhood = name; neighborhoodData = null; }}
 	onNeighborhoodHover={(name) => { hoveredNeighborhood = name; }}
 />
@@ -320,7 +338,7 @@
 <WuzHere bind:this={wuzHere} onDone={invalidateAll} center={mapCenter} />
 
 <style>
-	header {
+	.page-header {
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -331,6 +349,14 @@
 		align-items: center;
 		justify-content: space-between;
 		overflow: visible;
+	}
+
+	.wordmark {
+		font-family: 'Press Start 2P', monospace;
+		font-size: 0.75rem;
+		color: var(--color-accent);
+		letter-spacing: 0.05em;
+		white-space: nowrap;
 	}
 
 	details {
@@ -344,11 +370,7 @@
 		outline: none;
 	}
 
-	input[type='file'] {
-		display: none;
-	}
-
-	nav ul {
+	nav > ul {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -357,13 +379,9 @@
 		list-style: none;
 	}
 
-	.mobile-menu-account {
-		display: none;
-	}
-
 	.start-here {
 		font-size: 0.75rem;
-		color: var(--pico-muted-color);
+		color: var(--color-text-muted);
 		animation: pulse 2s ease-in-out infinite;
 		white-space: nowrap;
 	}
@@ -373,19 +391,8 @@
 		50% { opacity: 1; }
 	}
 
-	@media (max-width: 480px) {
-		.account-btn-wrap {
-			display: none;
-		}
-		.mobile-menu-account {
-			display: block;
-		}
-	}
-
-	.account-btn {
-		margin: 0;
-		padding: 0.25rem 0.75rem;
-		font-size: 0.875rem;
+	@media (max-width: 400px) {
+		.wordmark { display: none; }
 	}
 
 	.account-actions {
@@ -395,13 +402,10 @@
 		margin-bottom: 1rem;
 	}
 
-	.account-actions button {
-		width: 100%;
-		margin: 0;
-	}
+	.account-actions button { width: 100%; }
 
 	.auth-error {
-		color: var(--pico-del-color);
+		color: var(--color-danger);
 		font-size: 0.875rem;
 		margin-top: -0.5rem;
 	}
@@ -411,26 +415,17 @@
 		width: 90vw;
 	}
 
-	.explainer {
-		font-size: 0.875rem;
-		margin-bottom: 1.25rem;
-	}
-
-	.explainer p {
-		margin-bottom: 0.5rem;
-	}
-
-.import-log {
+	.import-log {
 		font-size: 0.8rem;
 		margin-bottom: 1rem;
-		border-top: 1px solid var(--pico-muted-border-color);
+		border-top: 1px solid var(--color-border);
 		padding-top: 0.75rem;
 	}
 
 	.import-log p {
 		margin: 0 0 0.4rem;
 		font-weight: 600;
-		color: var(--pico-muted-color);
+		color: var(--color-text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		font-size: 0.7rem;
@@ -453,9 +448,7 @@
 		word-break: break-all;
 	}
 
-	.log-meta {
-		color: var(--pico-muted-color);
-	}
+	.log-meta { color: var(--color-text-muted); }
 
 	.feedback-intro {
 		font-size: 0.875rem;
@@ -475,28 +468,26 @@
 		position: absolute;
 		left: 50%;
 		transform: translateX(-50%);
-		font-size: 0.8rem;
-		color: var(--pico-muted-color);
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
 		pointer-events: none;
 		white-space: nowrap;
 	}
 
 	.tab {
-		--pico-form-element-spacing-vertical: 0.2rem;
-		--pico-form-element-spacing-horizontal: 0.65rem;
-		margin: 0;
-		font-size: 0.8rem;
+		padding: 0.3em 0.65em;
+		font-size: 0.55rem;
 		background: none;
 		border: 1px solid transparent;
-		border-radius: 0.25rem;
-		color: var(--pico-muted-color);
+		border-radius: var(--radius);
+		color: var(--color-text-muted);
 		white-space: nowrap;
 	}
 
 	.tab.active {
-		color: var(--pico-primary);
-		border-color: var(--pico-primary);
-		background: var(--pico-primary-background);
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+		background: var(--color-accent-dim);
 	}
 
 	.welcome-dialog article {
@@ -506,29 +497,25 @@
 	}
 
 	.welcome-dialog h3 {
-		font-size: 1.3rem;
-		margin-bottom: 0;
-	}
-
-	.welcome-dialog p {
-		font-size: 0.95rem;
+		font-size: 0.7rem;
 		margin-bottom: 0.75rem;
 	}
 
-	.welcome-dialog footer {
-		justify-content: center;
+	.welcome-dialog p {
+		font-size: 0.9rem;
+		margin-bottom: 0.75rem;
 	}
+
+	.welcome-dialog footer { justify-content: center; }
 
 	.wuz-here-fab {
 		position: fixed;
 		bottom: 2rem;
 		right: 2rem;
 		z-index: 10;
-		margin: 0;
-		border-radius: 2rem;
-		padding: 0.6rem 1.25rem;
-		font-size: 0.9rem;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		padding: 0.75rem 1.4rem;
+		font-size: 0.6rem;
+		box-shadow: var(--shadow);
 	}
 
 	.wuz-here-fab.pulse {
@@ -536,7 +523,10 @@
 	}
 
 	@keyframes wuz-pulse {
-		0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); transform: scale(1); }
-		50% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--pico-primary) 35%, transparent), 0 2px 8px rgba(0, 0, 0, 0.2); transform: scale(1.08); }
+		0%, 100% { box-shadow: var(--shadow); transform: translate(0, 0); }
+		50% {
+			box-shadow: 6px 6px 0 var(--color-accent-dim);
+			transform: translate(-1px, -1px);
+		}
 	}
 </style>

@@ -7,8 +7,8 @@
 	 * @typedef {{type: string, coordinates: any}} GeoJsonGeom
 	 * @typedef {{name: string, polygon: GeoJsonGeom|null, completionPct: number|null, centroidLat: number, centroidLng: number, visitCount: number}} NeighborhoodInfo
 	 */
-	/** @type {{ places?: import('./parseVisits.js').Place[], neighborhoods?: NeighborhoodInfo[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: GeoJsonGeom|null, userPolygon: GeoJsonGeom|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void, onNeighborhoodHover?: (name: string|null) => void }} */
-	let { places = [], neighborhoods = [], activeNeighborhood = null, neighborhoodData = null, onNeighborhoodSelect, onNeighborhoodHover } = $props();
+	/** @type {{ places?: import('./parseVisits.js').Place[], neighborhoods?: NeighborhoodInfo[], activeNeighborhood?: string|null, neighborhoodData?: {polygon: GeoJsonGeom|null, userPolygon: GeoJsonGeom|null, completionPct: number|null}|null, onNeighborhoodSelect?: (name: string) => void, onNeighborhoodHover?: (name: string|null) => void, theme?: string }} */
+	let { places = [], neighborhoods = [], activeNeighborhood = null, neighborhoodData = null, onNeighborhoodSelect, onNeighborhoodHover, theme = 'dark' } = $props();
 
 	let mapContainer = $state();
 	let fogCanvas = $state();
@@ -171,11 +171,13 @@
 				ctx.globalCompositeOperation = 'source-over';
 				ctx.globalAlpha = 1;
 
+				const accent = getComputedStyle(fogCanvas).getPropertyValue('--color-accent').trim() || '#22d3ee';
+
 				// Dungeon wall — boundary as solid stroke
 				drawGeoJsonPolygon(ctx, map, boundary, {
-					strokeStyle: 'hsl(220, 60%, 35%)',
+					strokeStyle: accent,
 					lineWidth: 2.5,
-					globalAlpha: 0.85,
+					globalAlpha: 0.7,
 					lineDash: []
 				});
 
@@ -185,9 +187,9 @@
 				const upRing = up?.type === 'Polygon' ? up.coordinates[0] : null;
 				if (up && upRing && upRing.length > 4) {
 					drawGeoJsonPolygon(ctx, map, up, {
-						strokeStyle: 'hsl(220, 60%, 55%)',
+						strokeStyle: accent,
 						lineWidth: 1.5,
-						globalAlpha: 0.5,
+						globalAlpha: 0.35,
 						lineDash: [4, 3]
 					});
 				}
@@ -339,12 +341,17 @@
 	}
 
 	$effect(() => {
-		places; neighborhoods; activeNeighborhood; neighborhoodData;
+		places; neighborhoods; activeNeighborhood; neighborhoodData; theme;
 		if (!map) return;
 
 		updatePinsSource();
 		updateNeighborhoodSource();
 		drawFog(map);
+
+		// Sync Mapbox layer colors to current theme accent
+		const accent = getComputedStyle(mapContainer).getPropertyValue('--color-accent').trim() || '#0a6b7a';
+		if (map.getLayer('pins')) map.setPaintProperty('pins', 'circle-color', accent);
+		if (map.getLayer('cluster-labels')) map.setPaintProperty('cluster-labels', 'text-color', accent);
 
 		const inArea = !!activeNeighborhood;
 		if (map.getLayer('cluster-labels')) {
@@ -379,6 +386,8 @@
 				.filter((layer) => layer['source-layer'] === 'road')
 				.forEach((layer) => map.setLayoutProperty(layer.id, 'visibility', 'none'));
 
+			const accent = getComputedStyle(mapContainer).getPropertyValue('--color-accent').trim() || '#0a6b7a';
+
 			// --- Places source (clustered) ---
 			map.addSource('places', {
 				type: 'geojson',
@@ -398,7 +407,7 @@
 				source: 'places',
 				filter: ['has', 'point_count'],
 				paint: {
-					'circle-color': 'hsl(220, 60%, 40%)',
+					'circle-color': accent,
 					'circle-radius': 18,
 					'circle-opacity': 0,
 					'circle-stroke-opacity': 0
@@ -419,7 +428,7 @@
 					'text-offset': [0, 0]
 				},
 				paint: {
-					'text-color': 'hsl(220, 60%, 40%)',
+					'text-color': accent,
 					'text-halo-color': '#fff',
 					'text-halo-width': 1.5
 				}
@@ -432,7 +441,7 @@
 				source: 'places',
 				filter: ['!', ['has', 'point_count']],
 				paint: {
-					'circle-color': 'hsl(220, 60%, 40%)',
+					'circle-color': accent,
 					'circle-radius': 6,
 					'circle-stroke-width': 1.5,
 					'circle-stroke-color': '#fff',
@@ -582,10 +591,13 @@
 	:global(.mapboxgl-popup-content) {
 		padding: 0.25rem 0.5rem;
 		font-size: 0.75rem;
-		font-family: inherit;
+		font-family: 'Barlow', system-ui, sans-serif;
 		border-radius: 0.25rem;
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 		pointer-events: none;
+		background: var(--color-surface);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
 	}
 
 	:global(.mapboxgl-popup-tip) {
@@ -599,17 +611,16 @@
 		z-index: 2;
 		width: 2rem;
 		height: 2rem;
-		margin: 0;
 		padding: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--pico-background-color);
-		border: 1px solid var(--pico-muted-border-color);
-		border-radius: 0.3rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 		cursor: pointer;
-		color: var(--pico-color);
+		color: var(--color-text);
 		line-height: 1;
 	}
 </style>

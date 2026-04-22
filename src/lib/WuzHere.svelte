@@ -347,8 +347,8 @@
 <dialog bind:this={dialog}>
 	<article>
 		<header>
-			<button class="close" aria-label="Close" onclick={close}></button>
 			<h3>Wuz Here</h3>
+			<button class="close" aria-label="Close" onclick={close}></button>
 		</header>
 
 		<nav class="wuz-tabs">
@@ -486,21 +486,19 @@
 	}
 
 	.wuz-tab {
-		--pico-form-element-spacing-vertical: 0.2rem;
-		--pico-form-element-spacing-horizontal: 0.65rem;
-		margin: 0;
-		font-size: 0.8rem;
+		padding: 0.3em 0.65em;
+		font-size: 0.55rem;
 		background: none;
 		border: 1px solid transparent;
-		border-radius: 0.25rem;
-		color: var(--pico-muted-color);
+		border-radius: var(--radius);
+		color: var(--color-text-muted);
 		white-space: nowrap;
 	}
 
 	.wuz-tab.active {
-		color: var(--pico-primary);
-		border-color: var(--pico-primary);
-		background: var(--pico-primary-background);
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+		background: var(--color-accent-dim);
 	}
 
 	.tab-content {
@@ -511,7 +509,7 @@
 
 	.hint {
 		font-size: 0.875rem;
-		color: var(--pico-muted-color);
+		color: var(--color-text-muted);
 		margin: 0;
 	}
 
@@ -520,14 +518,14 @@
 		flex-direction: column;
 		gap: 0.2rem;
 		padding: 0.6rem 0.75rem;
-		background: var(--pico-card-background-color);
-		border-radius: 0.375rem;
+		background: var(--color-surface-raised);
+		border-radius: var(--radius);
 		font-size: 0.875rem;
 	}
 
 	.coords {
 		font-size: 0.75rem;
-		color: var(--pico-muted-color);
+		color: var(--color-text-muted);
 	}
 
 	.actions {
@@ -535,10 +533,7 @@
 		gap: 0.5rem;
 	}
 
-	.actions button {
-		margin: 0;
-		flex: 1;
-	}
+	.actions button { flex: 1; }
 
 	.place-list {
 		list-style: none;
@@ -557,30 +552,28 @@
 		justify-content: space-between;
 		gap: 0.5rem;
 		padding: 0.5rem 0.6rem;
-		background: var(--pico-card-background-color);
-		border-radius: 0.375rem;
+		background: var(--color-surface-raised);
+		border-radius: var(--radius);
 		font-size: 0.875rem;
 	}
 
 	.place-meta {
 		display: block;
 		font-size: 0.75rem;
-		color: var(--pico-muted-color);
+		color: var(--color-text-muted);
 	}
 
 	button.small {
-		--pico-form-element-spacing-vertical: 0.15rem;
-		--pico-form-element-spacing-horizontal: 0.4rem;
-		font-size: 0.75rem;
-		margin: 0;
+		padding: 0.3em 0.5em;
+		font-size: 0.5rem;
 	}
 
 	.search-results {
 		list-style: none;
 		margin: 0;
 		padding: 0;
-		border: 1px solid var(--pico-muted-border-color);
-		border-radius: 0.375rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
 		overflow: hidden;
 	}
 
@@ -589,29 +582,27 @@
 		text-align: left;
 		background: none;
 		border: none;
-		border-bottom: 1px solid var(--pico-muted-border-color);
+		border-bottom: 1px solid var(--color-border);
 		border-radius: 0;
-		padding: 0.5rem 0.75rem;
+		padding: 0.55rem 0.75rem;
+		font-family: 'Barlow', sans-serif;
 		font-size: 0.875rem;
-		margin: 0;
+		letter-spacing: 0;
+		color: var(--color-text);
 		cursor: pointer;
+		transition: background 0.1s;
 	}
 
-	.result-item:last-child {
-		border-bottom: none;
-	}
+	.result-item:hover { background: var(--color-accent-dim); }
+	.result-item:last-child { border-bottom: none; }
 
-	.muted {
-		color: var(--pico-muted-color);
-	}
+	.muted { color: var(--color-text-muted); }
 
 	.wuz-error {
-		color: var(--pico-del-color);
+		color: var(--color-danger);
 		font-size: 0.875rem;
 		margin: 0.5rem 0 0;
 	}
 
-	input[type='file'] {
-		display: none;
-	}
+	input[type='file'] { display: none; }
 </style>

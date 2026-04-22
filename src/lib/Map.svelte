@@ -179,9 +179,12 @@
 					lineDash: []
 				});
 
-				// User convex hull — explored shape within the dungeon
-				if (neighborhoodData?.userPolygon) {
-					drawGeoJsonPolygon(ctx, map, neighborhoodData.userPolygon, {
+				// User convex hull — explored shape within the dungeon.
+				// Skip if it's a degenerate point/line/triangle (< 5 ring coords = ≤ 3 unique vertices).
+				const up = neighborhoodData?.userPolygon;
+				const upRing = up?.type === 'Polygon' ? up.coordinates[0] : null;
+				if (up && upRing && upRing.length > 4) {
+					drawGeoJsonPolygon(ctx, map, up, {
 						strokeStyle: 'hsl(220, 60%, 55%)',
 						lineWidth: 1.5,
 						globalAlpha: 0.5,
@@ -506,13 +509,13 @@
 				const feature = e.features?.[0];
 				if (!feature) return;
 				const { name, visitCount, totalDwellMinutes } = feature.properties ?? {};
-				if (!name) return;
+				const label = name || 'Unknown place';
 				const visits = `${visitCount} ${visitCount === 1 ? 'visit' : 'visits'}`;
 				const mins = Math.round(totalDwellMinutes ?? 0);
 				const time = mins >= 60
 					? `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? `${mins % 60}m` : ''}`.trim()
 					: mins > 0 ? `${mins}m` : null;
-				const html = `<strong>${name}</strong><br>${visits}${time ? ` · ${time}` : ''}`;
+				const html = `<strong>${label}</strong><br>${visits}${time ? ` · ${time}` : ''}`;
 				const coords = /** @type {[number, number]} */ ((/** @type {any} */ (feature.geometry)).coordinates.slice());
 				popup.setLngLat(coords).setHTML(html).addTo(map);
 			});
